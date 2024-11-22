@@ -1,5 +1,5 @@
 program: main.o user.o health.o
-	gcc main.c user.c health.c Personal_Celebration.c -o program
+	gcc main.c user.c health.c personalCeleb.c -o program
 
 main.o: main.c user.h
 	gcc -c main.c
@@ -10,8 +10,8 @@ user.o: user.c user.h
 health.o: health.c health.h
 	gcc -c health.c
 
-Personal_Celebration.o:  Personal_Celebration.c Personal_Celebration.h
-	gcc -c Personal_Celebration.c
+personalCeleb.o:  personalCeleb.c personalCeleb.h
+	gcc -c personalCeleb.c
 
 clean:
 	rm -f *.o program

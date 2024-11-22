@@ -1,5 +1,5 @@
-#ifndef Personal_Celebration
-#define Personal_Celebration
+#ifndef Personal_Celebrations
+#define Personal_Celebrations
 
 void main_menu_personal();
 void bookEvent();
