@@ -1,7 +1,8 @@
-#ifndef Personal_Celebrations
-#define Personal_Celebrations
+#ifndef personalCelebs
+#define personalCelebs
 
 void main_menu_personal();
+void personalcat_displayMenu();
 void bookEvent();
 void viewBookings();
 void displayQRCode(float amountDue);

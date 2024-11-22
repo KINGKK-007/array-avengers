@@ -5,7 +5,6 @@
 #include "personalCeleb.h"
 
 void main_menu_health();
-void healthcat_displayMenu();
 void main_menu_personal();
 
 #define CSV_FILE "user_data.csv"

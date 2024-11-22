@@ -7,6 +7,7 @@
 
 // Function prototypes
 void main_menu_personal();
+void personalcat_displayMenu();
 void bookEvent();
 void viewBookings();
 void displayQRCode(float amountDue);
@@ -55,7 +56,7 @@ Event events[] = {
     {"Housewarming Parties", "Warm up your new home with friends.", 600.0},
 };
 
-int main() {
+void main_menu_personal() {
     char choiceStr[10];
     int choice;
 
@@ -87,10 +88,9 @@ int main() {
                 getchar();
         }
     }
-    return 0;
 }
 
-void main_menu_personal() {
+void personalcat_displayMenu(){
     printLine();
     printf("Select an Event Category:\n");
     printLine();
@@ -110,7 +110,8 @@ void bookEvent() {
     char confirmStr[10];
     char confirm;
     system("clear");
-    main_menu_personal();
+    //  see here
+    personalcat_displayMenu();
     fgets(choiceStr, sizeof(choiceStr), stdin);
     sscanf(choiceStr, "%d", &eventChoice);
 
