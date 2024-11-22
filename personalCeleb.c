@@ -57,10 +57,9 @@ Event personal_events[] = {
 };
 
 void personal_main() {
-    char choiceStr[10];
-    int choice;
 
     while (1) {
+        int choice;
         system("clear"); // Use "cls" if on Windows
         personal_printLine();
         printf("\t\t\tPersonal Celebrations\n");
@@ -70,9 +69,8 @@ void personal_main() {
         printf("[3] Exit\n");
         personal_printLine();
         printf("Enter your choice: ");
-        getchar();
-        fgets(choiceStr, sizeof(choiceStr), stdin);
-        sscanf(choiceStr, "%d", &choice);
+        scanf("%d",&choice);
+        personal_clearInputBuffer();
 
         switch (choice) {
             case 1:
@@ -111,8 +109,8 @@ void personal_bookEvent() {
     char confirmStr[10];
     char confirm;
     system("clear");
-    //  see here
     personal_cat_display();
+    // personal_clearInputBuffer();
     fgets(choiceStr, sizeof(choiceStr), stdin);
     sscanf(choiceStr, "%d", &eventChoice);
 
@@ -148,6 +146,7 @@ void personal_bookEvent() {
     // Ask for date, venue, time with validation
     while (1) {
         printf("Enter Date (DD/MM/YYYY): ");
+        // personal_clearInputBuffer();
         fgets(newBooking.date, sizeof(newBooking.date), stdin);
         strtok(newBooking.date, "\n"); // Remove newline character
         if (!personal_isValidDate(newBooking.date)) {
@@ -163,11 +162,13 @@ void personal_bookEvent() {
     }
 
     printf("Enter Venue: ");
+    // personal_clearInputBuffer();
     fgets(newBooking.venue, sizeof(newBooking.venue), stdin);
     strtok(newBooking.venue, "\n");
 
     while (1) {
         printf("Enter Time (HH:MM): ");
+        // personal_clearInputBuffer();
         fgets(newBooking.time, sizeof(newBooking.time), stdin);
         strtok(newBooking.time, "\n");
         if (!personal_isValidTime(newBooking.time)) {
@@ -205,6 +206,7 @@ void personal_bookEvent() {
     personal_printLine();
 
     printf("Confirm Booking and Proceed to Payment? (Y/N): ");
+    // personal_clearInputBuffer();
     fgets(confirmStr, sizeof(confirmStr), stdin);
     confirm = confirmStr[0];
 
@@ -212,12 +214,14 @@ void personal_bookEvent() {
         personal_displayQRCode(newBooking.totalAmount);
         printf("Please pay ₹%.2f\n", newBooking.totalAmount);
         printf("Payment made? (Y/N): ");
+        // personal_clearInputBuffer();
         fgets(confirmStr, sizeof(confirmStr), stdin);
         confirm = confirmStr[0];
 
         if (confirm == 'Y' || confirm == 'y') {
             // Option to view invoice
             printf("Would you like to view your invoice? (Y/N): ");
+            // personal_clearInputBuffer();
             fgets(confirmStr, sizeof(confirmStr), stdin);
             confirm = confirmStr[0];
 
@@ -264,6 +268,7 @@ void personal_bookEvent() {
                 printf("[2] View All Bookings\n");
                 printf("[3] Exit\n");
                 personal_printLine();
+                // personal_clearInputBuffer();
                 printf("Enter your choice: ");
                 fgets(confirmStr, sizeof(confirmStr), stdin);
                 int postChoice = atoi(confirmStr);
@@ -470,6 +475,7 @@ int personal_getIntInput(char *prompt, int min, int max) {
     char inputStr[20];
     while (1) {
         printf("%s", prompt);
+        // personal_clearInputBuffer();
         fgets(inputStr, sizeof(inputStr), stdin);
         if (sscanf(inputStr, "%d", &value) != 1) {
             printf("Invalid input. Please enter a number.\n");

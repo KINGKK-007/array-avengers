@@ -57,9 +57,8 @@ Event com_events[] = {
 };
 
 void com_main() {
-
+        int choice_main;
     while (1) {
-        int choice = -1;
         system("clear"); // Use "cls" if on Windows
         com_printLine();
         printf("\t\t\tCommunity and Cultural Events\n");
@@ -69,9 +68,10 @@ void com_main() {
         printf("[3] Exit\n");
         com_printLine();
         printf("Enter your choice: ");
-        scanf("%d",&choice);
+        scanf("%d",&choice_main);
+        com_clearInputBuffer();
 
-        switch (choice) {
+        switch (choice_main) {
             case 1:
                 com_bookEvent();
                 break;
@@ -109,6 +109,7 @@ void com_bookEvent() {
     char confirm;
     system("clear");
     com_cat_display();
+    // com_clearInputBuffer();
     fgets(choiceStr, sizeof(choiceStr), stdin);
     sscanf(choiceStr, "%d", &eventChoice);
 
@@ -144,6 +145,7 @@ void com_bookEvent() {
     // Ask for date, venue, time with validation
     while (1) {
         printf("Enter Date (DD/MM/YYYY): ");
+        // com_clearInputBuffer();
         fgets(newBooking.date, sizeof(newBooking.date), stdin);
         strtok(newBooking.date, "\n"); // Remove newline character
         if (!com_isValidDate(newBooking.date)) {
@@ -159,11 +161,13 @@ void com_bookEvent() {
     }
 
     printf("Enter Venue: ");
+    // com_clearInputBuffer();
     fgets(newBooking.venue, sizeof(newBooking.venue), stdin);
     strtok(newBooking.venue, "\n");
 
     while (1) {
         printf("Enter Time (HH:MM): ");
+        // com_clearInputBuffer();
         fgets(newBooking.time, sizeof(newBooking.time), stdin);
         strtok(newBooking.time, "\n");
         if (!com_isValidTime(newBooking.time)) {
@@ -201,6 +205,7 @@ void com_bookEvent() {
     com_printLine();
 
     printf("Confirm Booking and Proceed to Payment? (Y/N): ");
+    // com_clearInputBuffer();
     fgets(confirmStr, sizeof(confirmStr), stdin);
     confirm = confirmStr[0];
 
@@ -208,12 +213,14 @@ void com_bookEvent() {
         com_displayQRCode(newBooking.totalAmount);
         printf("Please pay ₹%.2f\n", newBooking.totalAmount);
         printf("Payment made? (Y/N): ");
+        // com_clearInputBuffer();
         fgets(confirmStr, sizeof(confirmStr), stdin);
         confirm = confirmStr[0];
 
         if (confirm == 'Y' || confirm == 'y') {
             // Option to view invoice
             printf("Would you like to view your invoice? (Y/N): ");
+            // com_clearInputBuffer();
             fgets(confirmStr, sizeof(confirmStr), stdin);
             confirm = confirmStr[0];
 
@@ -260,6 +267,7 @@ void com_bookEvent() {
                 printf("[2] View All Bookings\n");
                 printf("[3] Exit\n");
                 com_printLine();
+                // com_clearInputBuffer();
                 printf("Enter your choice: ");
                 fgets(confirmStr, sizeof(confirmStr), stdin);
                 int postChoice = atoi(confirmStr);
@@ -466,6 +474,7 @@ int com_getIntInput(char *prompt, int min, int max) {
     int value;
     char inputStr[20];
     while (1) {
+        // com_clearInputBuffer();
         printf("%s", prompt);
         fgets(inputStr, sizeof(inputStr), stdin);
         if (sscanf(inputStr, "%d", &value) != 1) {
