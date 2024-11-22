@@ -2,9 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include "health.h"
+#include "Personal_Celebrations.h"
 
 void main_menu_health();
 void healthcat_displayMenu();
+void main_menu_personal();
 
 #define CSV_FILE "user_data.csv"
 
@@ -62,7 +64,7 @@ void user_first_page()
         switch (choice)
         {
         case 1:
-            // personal_dev();
+            main_menu_personal();
             break;
         case 2:
             // com_eve();

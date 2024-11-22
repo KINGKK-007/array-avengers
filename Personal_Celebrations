@@ -6,7 +6,7 @@
 #define MAX_BOOKINGS 100
 
 // Function prototypes
-void displayMenu();
+void main_menu_personal();
 void bookEvent();
 void viewBookings();
 void displayQRCode(float amountDue);
@@ -90,7 +90,7 @@ int main() {
     return 0;
 }
 
-void displayMenu() {
+void main_menu_personal() {
     printLine();
     printf("Select an Event Category:\n");
     printLine();
@@ -110,7 +110,7 @@ void bookEvent() {
     char confirmStr[10];
     char confirm;
     system("clear");
-    displayMenu();
+    main_menu_personal();
     fgets(choiceStr, sizeof(choiceStr), stdin);
     sscanf(choiceStr, "%d", &eventChoice);
 
