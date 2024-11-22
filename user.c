@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include "health.h"
 #include "personalCeleb.h"
+#include "com_cul.h"
 
 void health_main();
-void health_cat_display();
 void personal_main();
-void personal_cat_display();
+void com_main();
 
 #define CSV_FILE "user_data.csv"
 
@@ -68,7 +68,7 @@ void user_first_page()
             personal_main();
             break;
         case 2:
-            // com_eve();
+            com_main();
             break;
         case 3:
             // edu_dev();
