@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "health.h"
-#include "Personal_Celebrations.h"
+#include "Personal_Celebration.h"
 
 void main_menu_health();
 void healthcat_displayMenu();
