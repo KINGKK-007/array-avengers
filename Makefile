@@ -4,7 +4,7 @@ CFLAGS = -c -Wall -Wextra
 LDFLAGS = -o program
 
 # Targets
-program: main.o user.o health.o personalCeleb.o
+program: main.o user.o health.o personalCeleb.o com_cul.o
 	$(CC) main.o user.o health.o personalCeleb.o com_cul.o $(LDFLAGS)
 
 main.o: main.c user.h

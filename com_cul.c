@@ -6,7 +6,8 @@
 #define MAX_BOOKINGS 100
  
 // Function prototypes
-void com_displayMenu();
+void com_main();
+void com_cat_display();
 void com_bookEvent();
 void com_viewBookings();
 void com_displayQRCode(float amountDue);
@@ -55,11 +56,10 @@ Event com_events[] = {
     {"Charity Events", "Support causes through community com_events.", 550.0},
 };
 
-int main() {
-    char choiceStr[10];
-    int choice;
+void com_main() {
 
     while (1) {
+        int choice = -1;
         system("clear"); // Use "cls" if on Windows
         com_printLine();
         printf("\t\t\tCommunity and Cultural Events\n");
@@ -69,8 +69,7 @@ int main() {
         printf("[3] Exit\n");
         com_printLine();
         printf("Enter your choice: ");
-        fgets(choiceStr, sizeof(choiceStr), stdin);
-        sscanf(choiceStr, "%d", &choice);
+        scanf("%d",&choice);
 
         switch (choice) {
             case 1:
@@ -87,10 +86,9 @@ int main() {
                 getchar();
         }
     }
-    return 0;
 }
 
-void com_displayMenu() {
+void com_cat_display() {
     com_printLine();
     printf("Select an Event Category:\n");
     com_printLine();
@@ -110,7 +108,7 @@ void com_bookEvent() {
     char confirmStr[10];
     char confirm;
     system("clear");
-    com_displayMenu();
+    com_cat_display();
     fgets(choiceStr, sizeof(choiceStr), stdin);
     sscanf(choiceStr, "%d", &eventChoice);
 
