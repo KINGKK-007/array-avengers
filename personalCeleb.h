@@ -1,18 +1,18 @@
 #ifndef personalCelebs
 #define personalCelebs
 
-void main_menu_personal();
-void personalcat_displayMenu();
-void bookEvent();
-void viewBookings();
-void displayQRCode(float amountDue);
-void printLine();
-void exitProgram();
-void goBack();
-int isValidDate(char *dateStr);
-int isValidTime(char *timeStr);
-int isFutureDateTime(char *dateStr, char *timeStr);
-int getIntInput(char *prompt, int min, int max);
-void clearInputBuffer();
+void personal_main();
+void personal_cat_display();
+void personal_bookEvent();
+void personal_viewBookings();
+void personal_displayQRCode(float amountDue);
+void personal_printLine();
+void personal_exitProgram();
+void personal_goBack();
+int personal_isValidDate(char *dateStr);
+int personal_isValidTime(char *timeStr);
+int personal_isFutureDateTime(char *dateStr, char *timeStr);
+int personal_getIntInput(char *prompt, int min, int max);
+void personal_clearInputBuffer();
 
 #endif

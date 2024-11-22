@@ -1,17 +1,23 @@
-program: main.o user.o health.o
-	gcc main.c user.c health.c personalCeleb.c -o program
+# Variables
+CC = gcc
+CFLAGS = -c -Wall -Wextra
+LDFLAGS = -o program
+
+# Targets
+program: main.o user.o health.o personalCeleb.o
+	$(CC) main.o user.o health.o personalCeleb.o $(LDFLAGS)
 
 main.o: main.c user.h
-	gcc -c main.c
+	$(CC) $(CFLAGS) main.c
 
-user.o: user.c user.h
-	gcc -c user.c
+user.o: user.c user.h health.h
+	$(CC) $(CFLAGS) user.c
 
 health.o: health.c health.h
-	gcc -c health.c
+	$(CC) $(CFLAGS) health.c
 
-personalCeleb.o:  personalCeleb.c personalCeleb.h
-	gcc -c personalCeleb.c
+personalCeleb.o: personalCeleb.c personalCeleb.h
+	$(CC) $(CFLAGS) personalCeleb.c
 
 clean:
 	rm -f *.o program

@@ -4,8 +4,10 @@
 #include "health.h"
 #include "personalCeleb.h"
 
-void main_menu_health();
-void main_menu_personal();
+void health_main();
+void health_cat_display();
+void personal_main();
+void personal_cat_display();
 
 #define CSV_FILE "user_data.csv"
 
@@ -63,7 +65,7 @@ void user_first_page()
         switch (choice)
         {
         case 1:
-            main_menu_personal();
+            personal_main();
             break;
         case 2:
             // com_eve();
@@ -75,7 +77,7 @@ void user_first_page()
             // prof_dev();
             break;
         case 5:
-            main_menu_health();
+            health_main();
             break;
         case 6:
             // others();
