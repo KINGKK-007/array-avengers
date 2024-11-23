@@ -1,7 +1,8 @@
 #ifndef COM_CUL
 #define COM_CUL
 
-void com_displayMenu();
+void com_main();
+void com_cat_display();
 void com_bookEvent();
 void com_viewBookings();
 void com_displayQRCode(float amountDue);

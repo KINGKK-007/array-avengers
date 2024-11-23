@@ -4,10 +4,16 @@
 #include "health.h"
 #include "personalCeleb.h"
 #include "com_cul.h"
+#include "edu_aca.h"
+#include "prof.h"
+#include "corp.h"
 
 void health_main();
 void personal_main();
 void com_main();
+void edu_main();
+void prof_main();
+void corp_main();
 
 #define CSV_FILE "user_data.csv"
 
@@ -71,19 +77,19 @@ void user_first_page()
             com_main();
             break;
         case 3:
-            // edu_dev();
+            edu_main();
             break;
         case 4:
-            // prof_dev();
+            prof_main();
             break;
         case 5:
             health_main();
             break;
         case 6:
-            // others();
+            corp_main();
             break;
         case 7:
-            // personal_dev();
+            // others();
             break;
         
         default:
