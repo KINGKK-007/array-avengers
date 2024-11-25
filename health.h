@@ -4,7 +4,7 @@
 void health_main();
 void health_cat_display();
 void health_bookEvent();
-void health_viewBookings();
+void health_viewAllBookings();
 void health_displayQRCode(float amountDue);
 void health_printLine();
 void health_exitProgram();

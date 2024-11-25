@@ -5,11 +5,13 @@
 
 #define MAX_BOOKINGS 100
 
+//  have to declare health_viewBookings() and add csv in all the files 
+
 // Function prototypes
 void health_main();
 void health_cat_display();
 void health_bookEvent();
-void health_viewBookings();
+void health_viewAllBookings();
 void health_displayQRCode(float amountDue);
 void health_printLine();
 void health_exitProgram();
@@ -56,6 +58,53 @@ Event healht_events[] = {
     {"Health Check-up Camp", "Get a comprehensive health check-up by professionals.", 1500.0},
 };
 
+void health_saveBookingsToCSV(const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (!file) {
+        printf("Error opening file for saving.\n");
+        return;
+    }
+
+    // Write CSV header
+    fprintf(file, "EventName,Date,Venue,Time,NumberOfPeople,FeePerPerson,TotalBeforeGST,GSTAmount,TotalAmount,Description,Status\n");
+
+    for (int i = 0; i < health_bookingCount; i++) {
+        fprintf(file, "\"%s\",\"%s\",\"%s\",\"%s\",%d,%.2f,%.2f,%.2f,%.2f,\"%s\",\"%s\"\n",
+                bookings[i].eventName, bookings[i].date, bookings[i].venue, bookings[i].time,
+                bookings[i].numberOfPeople, bookings[i].feePerPerson, bookings[i].totalBeforeGST,
+                bookings[i].gstAmount, bookings[i].totalAmount, bookings[i].description, bookings[i].status);
+    }
+
+    fclose(file);
+    printf("Bookings saved successfully to %s.\n", filename);
+}
+
+void health_loadBookingsFromCSV(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        printf("No existing bookings found. Starting fresh.\n");
+        return;
+    }
+
+    char line[1024];
+    fgets(line, sizeof(line), file); // Skip the header line
+
+    health_bookingCount = 0;
+    while (fgets(line, sizeof(line), file) && health_bookingCount < MAX_BOOKINGS) {
+        Booking booking = {0};
+
+        sscanf(line, "\"%[^\"]\",\"%[^\"]\",\"%[^\"]\",\"%[^\"]\",%d,%f,%f,%f,%f,\"%[^\"]\",\"%[^\"]\"",
+               booking.eventName, booking.date, booking.venue, booking.time, &booking.numberOfPeople,
+               &booking.feePerPerson, &booking.totalBeforeGST, &booking.gstAmount, &booking.totalAmount,
+               booking.description, booking.status);
+
+        bookings[health_bookingCount++] = booking;
+    }
+
+    fclose(file);
+    printf("Bookings loaded successfully from %s.\n", filename);
+}
+
 void health_main()
 {
 
@@ -80,7 +129,7 @@ void health_main()
                 health_bookEvent();
                 break;
             case 2:
-                health_viewBookings();
+                health_viewAllBookings();
                 break;
             case 3:
                 health_exitProgram();
@@ -241,7 +290,7 @@ void health_bookEvent() {
                 getchar();
             }
 
-            strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
+            strncpy(newBooking.status, "Not Approved", sizeof(newBooking.status) - 1);
             newBooking.status[sizeof(newBooking.status) - 1] = '\0';
 
             if (health_bookingCount < MAX_BOOKINGS) {
@@ -275,60 +324,86 @@ void health_bookEvent() {
         printf("Press Enter to return to menu...");
         getchar();
     }
+    const char *csvFile = "health_bookings.csv";
+    health_saveBookingsToCSV(csvFile);
 }
 
-void health_viewBookings() {
-    system("clear");
-    health_printLine();
-    printf("\t\t\tAll Bookings\n");
-    health_printLine();
-    if (health_bookingCount == 0) {
-        printf("No bookings found.\n");
-    } else {
-        for (int i = 0; i < health_bookingCount; i++) {
-            printf("Booking %d:\n", i + 1);
-            printf("\tEvent: %s\n", bookings[i].eventName);
-            printf("\tDate: %s\n", bookings[i].date);
-            printf("\tVenue: %s\n", bookings[i].venue);
-            printf("\tTime: %s\n", bookings[i].time);
-            printf("\tNumber of People: %d\n", bookings[i].numberOfPeople);
-            printf("\tTotal Amount Paid: ₹%.2f\n", bookings[i].totalAmount);
-            printf("\tStatus: %s\n", bookings[i].status);
-            printf("\tDescription: %s\n", bookings[i].description);
-            health_printLine();
-        }
+#include <stdio.h>
+
+void health_viewAllBookings() {
+    getchar(); // Clear buffer for user input
+    FILE *file = fopen("health_bookings.csv", "r");
+    if (file == NULL) {
+        printf("No bookings found. The file does not exist or cannot be opened.\n");
+        printf("Press Enter to return to the main menu...");
+        getchar();
+        return;
     }
-    printf("Press Enter to return to menu...");
-    getchar();
+
+    // Temporary variables to read each line of the file
+    char line[1024];
+    int lineCount = 0;
+
+    printf("\n--- All Bookings ---\n");
+
+    // Skip the header row
+    if (fgets(line, sizeof(line), file) == NULL) {
+        printf("No data available.\n");
+        fclose(file);
+        printf("Press Enter to return to the main menu...");
+        getchar();
+        return;
+    }
+
+    // Read the bookings from the file line by line
+    while (fgets(line, sizeof(line), file)) {
+        lineCount++;
+        char eventName[50], date[20], venue[50], time[10], description[100], status[20];
+        int numberOfPeople;
+        float feePerPerson, totalBeforeGST, gstAmount, totalAmount;
+        sscanf(line, "%49[^,],%19[^,],%49[^,],%9[^,],%d,%f,%f,%f,%f,%99[^,],%19[^\n]",
+       eventName, date, venue, time, &numberOfPeople, &feePerPerson,
+       &totalBeforeGST, &gstAmount, &totalAmount, description, status);
+
+        // Display the booking details
+        printf("\nBooking #%d:\n", lineCount);
+        printf("Event Name       : %s\n", eventName);
+        printf("Date             : %s\n", date);
+        printf("Venue            : %s\n", venue);
+        printf("Time             : %s\n", time);
+        printf("Number of People : %d\n", numberOfPeople);
+        printf("Fee Per Person   : %.2f\n", feePerPerson);
+        printf("Total Before GST : %.2f\n", totalBeforeGST);
+        printf("GST Amount       : %.2f\n", gstAmount);
+        printf("Total Amount     : %.2f\n", totalAmount);
+        printf("Description      : %s\n", description);
+        printf("Status           : %s\n", status);
+    }
+
+    fclose(file);
+
+    if (lineCount == 0) {
+        printf("\nNo bookings found.\n");
+    }
+
+    // Provide the user with the option to return to the main menu
+    int choice;
+    do {
+        printf("\n--- Menu ---\n");
+        printf("1. Return to Main Menu\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        if (choice == 1) {
+            printf("\nReturning to the Main Menu...\n");
+            return;
+        } else {
+            printf("\nInvalid choice. Please try again.\n");
+        }
+    } while (choice != 1);
 }
 
-// void health_displayQRCode(float amountDue) {
-//     system("clear");
-//     health_printLine();
-//     printf("\t\t\tScan QR Code to Pay\n");
-//     health_printLine();
 
-//     srand(time(0)); // Seed the random number generator for randomness
-//     int size = 21; // QR code size (21x21 for standard)
-
-//     for (int i = 0; i < size; i++) {
-//         for (int j = 0; j < size; j++) {
-//             // Fill the edges
-//             if (i == 0 || i == size - 1 || j == 0 || j == size -1) {
-//                 printf("██"); // Edge blocks
-//             } else {
-//                 // Randomly decide whether to print a block or a space
-//                 if (rand() % 2 == 0) {
-//                     printf("  "); // Double spaces for white space
-//                 } else {
-//                     printf("██"); // Use block character for black square
-//                 }
-//             }
-//         }
-//         printf("\n");
-//     }
-//     health_printLine();
-// }
 
 void health_displayQRCode(float amount_due) {
     system("clear");
