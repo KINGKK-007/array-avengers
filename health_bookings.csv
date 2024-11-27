@@ -1,3 +1,2 @@
 EventName,Date,Venue,Time,NumberOfPeople,FeePerPerson,TotalBeforeGST,GSTAmount,TotalAmount,Description,Status
-"Yoga Sessions","12/12/2024","12:23","12:23",55,500.00,27500.00,4950.00,32450.00,"Join us for relaxing yoga sessions with experienced instructors.","Not Approved"
-"Meditation Workshops","8/12/2024","patiala","12:23",55,750.00,41250.00,7425.00,48675.00,"Learn meditation techniques in a peaceful environment.","Not Approved"
+"Meditation Workshops","12/12/2024","patiala","12:30",67,750.00,50250.00,9045.00,59295.00,"Learn meditation techniques in a peaceful environment.","Not Approved"

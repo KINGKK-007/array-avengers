@@ -5,8 +5,6 @@
 
 #define MAX_BOOKINGS 100
 
-//  have to declare health_viewBookings() and add csv in all the files 
-
 // Function prototypes
 void health_main();
 void health_cat_display();
@@ -109,7 +107,7 @@ void health_main()
 {
 
     while (1) {
-        // char choiceStr[10];
+
         int choice;
         system("clear"); // Use "cls" if on Windows
         health_printLine();
@@ -120,8 +118,6 @@ void health_main()
         printf("[3] Exit\n");
         health_printLine();
         printf("Enter your choice: ");
-        // fgets(choiceStr, sizeof(choiceStr), stdin);
-        // sscanf(choiceStr, "%d", &choice);
         scanf("%d",&choice);
 
         switch (choice) {
@@ -210,7 +206,7 @@ void health_bookEvent() {
     printf("Enter Venue: ");
     fgets(newBooking.venue, sizeof(newBooking.venue), stdin);
     strtok(newBooking.venue, "\n");
-
+ 
     while (1) {
         printf("Enter Time (HH:MM): ");
         fgets(newBooking.time, sizeof(newBooking.time), stdin);

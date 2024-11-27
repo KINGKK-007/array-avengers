@@ -2,8 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #define MAX_BOOKINGS 100
+#define RESET "\033[0m"
+#define BOLD "\033[1m"
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define MAGENTA "\033[35m"
+#define YELLOW "\033[1;33m"
+#define BLUE "\033[1;34m"
+#define CYAN "\033[1;36m"
 
 // Function prototypes
 void personal_main();
@@ -20,7 +29,6 @@ int personal_isFutureDateTime(char *dateStr, char *timeStr);
 int personal_getIntInput(char *prompt, int min, int max);
 void personal_clearInputBuffer();
 
-// Booking structure
 typedef struct {
     char eventName[50];
     char date[15];
@@ -34,6 +42,13 @@ typedef struct {
     char description[255];
     char status[20];
 } Booking;
+
+typedef struct BookingNode {
+    Booking data;
+    struct BookingNode *next;
+} BookingNode;
+
+BookingNode *bookingList = NULL;
 
 Booking bookings[MAX_BOOKINGS];
 int personal_bookingCount = 0;
@@ -56,51 +71,125 @@ Event personal_events[] = {
     {"Housewarming Parties", "Warm up your new home with friends.", 600.0},
 };
 
-void personal_main() {
+int personal_getTerminalWidth() {
+    FILE *fp = popen("tput cols", "r");
+    if (!fp)
+        return 80; // Default width if the command fails
+    int width;
+    fscanf(fp, "%d", &width);
+    pclose(fp);
+    return width;
+}
 
+void personal_printLine() {
+    printf("\033[1;36m%s\033[0m\n", "=======================================================");
+}
+
+void personal_displayCenteredText(const char* text, int width, const char* color) {
+    int padding = (width - (int)strlen(text)) / 2;
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("%s%s%s\n", color, text, RESET);
+}
+
+void personal_displayBanner(int width) {
+    for (int i = 0; i < width; i++) printf("\033[1;36m=\033[0m");
+    printf("\n");
+}
+
+void personal_main() {
     while (1) {
         int choice;
-        system("clear"); // Use "cls" if on Windows
-        personal_printLine();
-        printf("\t\t\tPersonal Celebrations\n");
-        personal_printLine();
-        printf("[1] Book an Event\n");
-        printf("[2] View All Bookings\n");
-        printf("[3] Exit\n");
-        personal_printLine();
-        printf("Enter your choice: ");
-        scanf("%d",&choice);
-        personal_clearInputBuffer();
+        int width = personal_getTerminalWidth(); // Get the current terminal width dynamically
 
+        // Clear the screen
+        system("clear");
+
+        // Display the header
+        personal_displayBanner(width);
+        personal_displayCenteredText("\xF0\x9F\x92\xAB PERSONAL CELEBRATIONS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        personal_displayBanner(width);
+
+        // Menu options
+        printf("\n");
+        personal_displayCenteredText("\x31\xE2\x83\xA3 Book an Event\n", width, YELLOW BOLD);   // 1️⃣
+        personal_displayCenteredText("\x32\xE2\x83\xA3 View All Bookings\n", width, BLUE); // 2️⃣
+        personal_displayCenteredText("\x33\xE2\x83\xA3 Exit\n", width, RED);           // 3️⃣
+        printf("\n");
+
+
+        // Prompt for choice
+        printf("%sEnter your choice: %s", BOLD, GREEN);
+        scanf("%d", &choice);
+        getchar(); // Clear newline character from input buffer
+
+        // Handle user choice
         switch (choice) {
             case 1:
+                system("clear");
+                personal_displayCenteredText("\xF0\x9F\x8E\x89 Booking an event... \xF0\x9F\x8E\x89", width, GREEN); // 🎉
                 personal_bookEvent();
+                sleep(2);
                 break;
+
             case 2:
+                system("clear");
+                personal_displayCenteredText("\xF0\x9F\x93\x8C Viewing all bookings... \xF0\x9F\x93\x8C", width, GREEN); // 📌
                 personal_viewBookings();
+                sleep(2);
                 break;
+
             case 3:
-                personal_exitProgram();
-                break;
+                system("clear");
+                personal_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
+                sleep(2);
+                exit(0);
+
             default:
-                printf("Invalid choice! Press Enter to try again...");
-                getchar();
+                system("clear");
+                personal_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
+                sleep(2);
         }
     }
 }
 
-void personal_cat_display(){
-    personal_printLine();
-    printf("Select an Event Category:\n");
-    personal_printLine();
+void personal_cat_display() {
+    int width = personal_getTerminalWidth(); // Dynamically determine terminal width
+
+    // Clear the screen for a fresh UI
+    system("clear");
+
+    // Display header
+    printf("\n");
+    personal_displayCenteredText("\xF0\x9F\x92\x96 Personal Event Categories", width, MAGENTA BOLD); // 💖
+    printf("\n");
+    for (int i = 0; i < width; i++) // Print top border
+        printf("%s=%s", CYAN, RESET);
+    printf("\n");
+
+    // Display event categories
     int numEvents = sizeof(personal_events) / sizeof(personal_events[0]);
     for (int i = 0; i < numEvents; i++) {
-        printf("[%d] %s\n", i + 1, personal_events[i].name);
+        char eventLine[200];
+        snprintf(eventLine, sizeof(eventLine), "[%d] %s", i + 1, personal_events[i].name);
+        personal_displayCenteredText(eventLine, width, GREEN); // Display each event in green
     }
-    printf("[%d] Go Back\n", numEvents + 1);
-    personal_printLine();
-    printf("Enter your choice: ");
+
+    // Display "Go Back" option
+    char goBackLine[200];
+    snprintf(goBackLine, sizeof(goBackLine), "[%d] Go Back", numEvents + 1);
+    personal_displayCenteredText(goBackLine, width, YELLOW BOLD); // "Go Back" in yellow bold
+
+    // Print bottom separator
+    printf("\n");
+    for (int i = 0; i < width; i++) // Print bottom border
+        printf("%s=%s", CYAN, RESET);
+    printf("\n");
+
+    // Prompt for user input
+    personal_displayCenteredText("Enter your choice:", width, BLUE);
+    printf("%s> %s", BOLD, RESET);
 }
+
 
 void personal_bookEvent() {
     char choiceStr[10];
@@ -108,9 +197,14 @@ void personal_bookEvent() {
     Booking newBooking;
     char confirmStr[10];
     char confirm;
+
     system("clear");
+
+    // Display event categories
     personal_cat_display();
-    // personal_clearInputBuffer();
+
+    // Get user's event choice
+    printf("\n\033[1;33mEnter your choice: \033[0m");
     fgets(choiceStr, sizeof(choiceStr), stdin);
     sscanf(choiceStr, "%d", &eventChoice);
 
@@ -122,7 +216,7 @@ void personal_bookEvent() {
     }
 
     if (eventChoice < 1 || eventChoice > numEvents) {
-        printf("Invalid choice! Press Enter to return to menu...");
+        printf("\033[1;31mInvalid choice!\033[0m Press Enter to return to menu...");
         getchar();
         return;
     }
@@ -135,229 +229,165 @@ void personal_bookEvent() {
     newBooking.feePerPerson = selectedEvent.feePerPerson;
 
     system("clear");
+
+    // Display selected event details
     personal_printLine();
-    printf("Event Details:\n");
+    printf("\033[1;36mEvent Details\033[0m\n");
     personal_printLine();
-    printf("Event: %s\n", selectedEvent.name);
-    printf("Description: %s\n", selectedEvent.description);
-    printf("Fee per Person: ₹%.2f\n", selectedEvent.feePerPerson);
+    printf("\033[1;32mEvent:\033[0m %s\n", selectedEvent.name);
+    printf("\033[1;32mDescription:\033[0m %s\n", selectedEvent.description);
+    printf("\033[1;32mFee per Person:\033[0m ₹%.2f\n", selectedEvent.feePerPerson);
     personal_printLine();
 
-    // Ask for date, venue, time with validation
+    // Input Date
     while (1) {
-        printf("Enter Date (DD/MM/YYYY): ");
-        // personal_clearInputBuffer();
+        printf("\033[1;33mEnter Date (DD/MM/YYYY): \033[0m");
         fgets(newBooking.date, sizeof(newBooking.date), stdin);
         strtok(newBooking.date, "\n"); // Remove newline character
         if (!personal_isValidDate(newBooking.date)) {
-            printf("Invalid date format. Please try again.\n");
+            printf("\033[1;31mInvalid date format. Please try again.\033[0m\n");
             continue;
         }
-        // Check if date is in the future
         if (!personal_isFutureDateTime(newBooking.date, "00:00")) {
-            printf("Date must be in the future. Please enter a future date.\n");
+            printf("\033[1;31mDate must be in the future. Please enter a future date.\033[0m\n");
             continue;
         }
         break;
     }
 
-    printf("Enter Venue: ");
-    // personal_clearInputBuffer();
+    // Input Venue
+    printf("\033[1;33mEnter Venue: \033[0m");
     fgets(newBooking.venue, sizeof(newBooking.venue), stdin);
     strtok(newBooking.venue, "\n");
 
+    // Input Time
     while (1) {
-        printf("Enter Time (HH:MM): ");
-        // personal_clearInputBuffer();
+        printf("\033[1;33mEnter Time (HH:MM): \033[0m");
         fgets(newBooking.time, sizeof(newBooking.time), stdin);
         strtok(newBooking.time, "\n");
         if (!personal_isValidTime(newBooking.time)) {
-            printf("Invalid time format. Please try again.\n");
+            printf("\033[1;31mInvalid time format. Please try again.\033[0m\n");
             continue;
         }
-        // Check if time is in the future on the same date
         if (!personal_isFutureDateTime(newBooking.date, newBooking.time)) {
-            printf("Time must be in the future. Please enter a future time.\n");
+            printf("\033[1;31mTime must be in the future. Please enter a future time.\033[0m\n");
             continue;
         }
         break;
     }
 
-    // Ask for the number of people with validation
-    newBooking.numberOfPeople = personal_getIntInput("Enter Number of People Attending (50-1500): ", 50, 1500);
+    // Input Number of People
+    newBooking.numberOfPeople = personal_getIntInput("\033[1;33mEnter Number of People Attending (50-1500): \033[0m", 50, 1500);
 
     // Calculate costs
     newBooking.totalBeforeGST = newBooking.feePerPerson * newBooking.numberOfPeople;
-    newBooking.gstAmount = newBooking.totalBeforeGST * 0.18; // 18% GST
+    newBooking.gstAmount = newBooking.totalBeforeGST * 0.18;
     newBooking.totalAmount = newBooking.totalBeforeGST + newBooking.gstAmount;
-
     strncpy(newBooking.status, "Waiting for Approval", sizeof(newBooking.status) - 1);
     newBooking.status[sizeof(newBooking.status) - 1] = '\0';
 
+    // Display cost breakdown
     personal_printLine();
-    // Show cost breakdown
-    printf("Cost Breakdown:\n");
+    printf("\033[1;36mCost Breakdown\033[0m\n");
     personal_printLine();
-    printf("Number of People: %d\n", newBooking.numberOfPeople);
-    printf("Fee per Person: ₹%.2f\n", newBooking.feePerPerson);
-    printf("Total before GST: ₹%.2f\n", newBooking.totalBeforeGST);
-    printf("GST @18%%: ₹%.2f\n", newBooking.gstAmount);
-    printf("Total Amount Payable: ₹%.2f\n", newBooking.totalAmount);
+    printf("\033[1;32mNumber of People:\033[0m %d\n", newBooking.numberOfPeople);
+    printf("\033[1;32mFee per Person:\033[0m ₹%.2f\n", newBooking.feePerPerson);
+    printf("\033[1;32mTotal before GST:\033[0m ₹%.2f\n", newBooking.totalBeforeGST);
+    printf("\033[1;32mGST @18%%:\033[0m ₹%.2f\n", newBooking.gstAmount);
+    printf("\033[1;32mTotal Amount Payable:\033[0m ₹%.2f\n", newBooking.totalAmount);
     personal_printLine();
 
-    printf("Confirm Booking and Proceed to Payment? (Y/N): ");
-    // personal_clearInputBuffer();
+    // Confirm booking
+    printf("\033[1;33mConfirm Booking and Proceed to Payment? (Y/N): \033[0m");
     fgets(confirmStr, sizeof(confirmStr), stdin);
     confirm = confirmStr[0];
 
     if (confirm == 'Y' || confirm == 'y') {
         personal_displayQRCode(newBooking.totalAmount);
-        printf("Please pay ₹%.2f\n", newBooking.totalAmount);
-        printf("Payment made? (Y/N): ");
-        // personal_clearInputBuffer();
+        printf("\033[1;36mPlease pay ₹%.2f\033[0m\n", newBooking.totalAmount);
+        printf("\033[1;33mPayment made? (Y/N): \033[0m");
         fgets(confirmStr, sizeof(confirmStr), stdin);
         confirm = confirmStr[0];
 
         if (confirm == 'Y' || confirm == 'y') {
-            // Option to view invoice
-            printf("Would you like to view your invoice? (Y/N): ");
-            // personal_clearInputBuffer();
+            printf("\033[1;33mWould you like to view your invoice? (Y/N): \033[0m");
             fgets(confirmStr, sizeof(confirmStr), stdin);
             confirm = confirmStr[0];
 
             if (confirm == 'Y' || confirm == 'y') {
                 system("clear");
                 personal_printLine();
-                printf("\t\t\t\tInvoice\n");
+                printf("\033[1;36m\t\t\tInvoice\033[0m\n");
                 personal_printLine();
-                printf("Event: %s\n", newBooking.eventName);
-                printf("Date: %s\n", newBooking.date);
-                printf("Venue: %s\n", newBooking.venue);
-                printf("Time: %s\n", newBooking.time);
+                printf("\033[1;32mEvent:\033[0m %s\n", newBooking.eventName);
+                printf("\033[1;32mDate:\033[0m %s\n", newBooking.date);
+                printf("\033[1;32mVenue:\033[0m %s\n", newBooking.venue);
+                printf("\033[1;32mTime:\033[0m %s\n", newBooking.time);
                 personal_printLine();
-                printf("Number of People: %d\n", newBooking.numberOfPeople);
-                printf("Fee per Person: ₹%.2f\n", newBooking.feePerPerson);
-                printf("Total before GST: ₹%.2f\n", newBooking.totalBeforeGST);
-                printf("GST @18%%: ₹%.2f\n", newBooking.gstAmount);
-                printf("Total Amount Paid: ₹%.2f\n", newBooking.totalAmount);
+                printf("\033[1;32mNumber of People:\033[0m %d\n", newBooking.numberOfPeople);
+                printf("\033[1;32mFee per Person:\033[0m ₹%.2f\n", newBooking.feePerPerson);
+                printf("\033[1;32mTotal before GST:\033[0m ₹%.2f\n", newBooking.totalBeforeGST);
+                printf("\033[1;32mGST @18%%:\033[0m ₹%.2f\n", newBooking.gstAmount);
+                printf("\033[1;32mTotal Amount Paid:\033[0m ₹%.2f\n", newBooking.totalAmount);
                 personal_printLine();
-                printf("Thank you for your payment!\n");
+                printf("\033[1;36mThank you for your payment!\033[0m\n");
                 personal_printLine();
                 printf("Press Enter to continue...");
                 getchar();
             }
 
             strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
-            newBooking.status[sizeof(newBooking.status) - 1] = '\0';
-
-            if (personal_bookingCount < MAX_BOOKINGS) {
-                bookings[personal_bookingCount++] = newBooking;
-                system("clear");
-                personal_printLine();
-                printf("\t\t\t\tBooking Confirmed!\n");
-                personal_printLine();
-                printf("Event: %s\n", newBooking.eventName);
-                printf("Date: %s\n", newBooking.date);
-                printf("Venue: %s\n", newBooking.venue);
-                printf("Time: %s\n", newBooking.time);
-                printf("Status: %s\n", newBooking.status);
-                personal_printLine();
-                printf("Thank you for booking with us!\n");
-                personal_printLine();
-                printf("[1] Book Another Event\n");
-                printf("[2] View All Bookings\n");
-                printf("[3] Exit\n");
-                personal_printLine();
-                // personal_clearInputBuffer();
-                printf("Enter your choice: ");
-                fgets(confirmStr, sizeof(confirmStr), stdin);
-                int postChoice = atoi(confirmStr);
-
-                switch (postChoice) {
-                    case 1:
-                        personal_bookEvent();
-                        break;
-                    case 2:
-                        personal_viewBookings();
-                        break;
-                    case 3:
-                        personal_exitProgram();
-                        break;
-                    default:
-                        printf("Invalid choice! Press Enter to return to main menu...");
-                        getchar();
-                }
-            } else {
-                printf("Booking limit reached. Cannot accept more bookings.\n");
-                printf("Press Enter to return to menu...");
-                getchar();
-            }
+            bookings[personal_bookingCount++] = newBooking;
+            system("clear");
+            printf("\033[1;32mBooking Confirmed!\033[0m\n");
         } else {
-            printf("Payment not completed. Booking canceled.\n");
-            printf("Press Enter to return to menu...");
-            getchar();
+            printf("\033[1;31mPayment not completed. Booking canceled.\033[0m\n");
         }
     } else {
-        printf("Booking canceled.\n");
-        printf("Press Enter to return to menu...");
-        getchar();
+        printf("\033[1;31mBooking canceled.\033[0m\n");
     }
-}
 
-void personal_viewBookings() {
-    system("clear");
-    personal_printLine();
-    printf("\t\t\t\tAll Bookings\n");
-    personal_printLine();
-    if (personal_bookingCount == 0) {
-        printf("No bookings found.\n");
-    } else {
-        for (int i = 0; i < personal_bookingCount; i++) {
-            printf("Booking %d:\n", i + 1);
-            printf("\tEvent: %s\n", bookings[i].eventName);
-            printf("\tDate: %s\n", bookings[i].date);
-            printf("\tVenue: %s\n", bookings[i].venue);
-            printf("\tTime: %s\n", bookings[i].time);
-            printf("\tNumber of People: %d\n", bookings[i].numberOfPeople);
-            printf("\tTotal Amount Paid: ₹%.2f\n", bookings[i].totalAmount);
-            printf("\tStatus: %s\n", bookings[i].status);
-            printf("\tDescription: %s\n", bookings[i].description);
-            personal_printLine();
-        }
-    }
     printf("Press Enter to return to menu...");
     getchar();
 }
 
-// Function to display a QR code with solid edges and random interior
-// void personal_displayQRCode(float amountDue) {
-//     system("clear");
-//     personal_printLine();
-//     printf("\t\t\tScan QR Code to Pay\n");
-//     personal_printLine();
 
-//     srand(time(0)); // Seed the random number generator for randomness
-//     int size = 21; // QR code size (21x21 for standard)
+void personal_viewBookings() {
+    system("clear");
 
-//     for (int i = 0; i < size; i++) {
-//         for (int j = 0; j < size; j++) {
-//             // Fill the edges
-//             if (i == 0 || i == size - 1 || j == 0 || j == size -1) {
-//                 printf("██"); // Edge blocks
-//             } else {
-//                 // Randomly decide whether to print a block or a space
-//                 if (rand() % 2 == 0) {
-//                     printf("  "); // Double spaces for white space
-//                 } else {
-//                     printf("██"); // Use block character for black square
-//                 }
-//             }
-//         }
-//         printf("\n");
-//     }
+    int terminalWidth = personal_getTerminalWidth();  // Get the terminal width dynamically
+    int columnWidth = terminalWidth / 8;  // Divide by 8 to fit the table columns neatly (adjust as needed)
 
-//     personal_printLine();
-// }
+    // Display centered title with color
+    personal_printLine();
+    personal_displayCenteredText("🎟️ All Bookings 🎟️", terminalWidth, "yellow");
+    personal_printLine();
+
+    if (personal_bookingCount == 0) {
+        personal_displayCenteredText("No bookings found.", terminalWidth, "red");
+    } else {
+        // Print table header with dynamic column width
+        printf("\n%-*s %-*s %-*s %-*s %-*s %-*s %-*s %-*s\n", 
+               columnWidth, "ID", columnWidth, "Event", columnWidth, "Date", 
+               columnWidth, "Venue", columnWidth, "Time", columnWidth, 
+               "No. of People", columnWidth, "Amount Paid", columnWidth, "Status");
+
+        personal_printLine();
+
+        for (int i = 0; i < personal_bookingCount; i++) {
+            // Print each booking in table format with dynamic column width
+            printf("%-*d %-*s %-*s %-*s %-*s %-*d %-*0.2f %-*s\n", 
+                   columnWidth, i + 1, columnWidth, bookings[i].eventName, columnWidth, 
+                   bookings[i].date, columnWidth, bookings[i].venue, columnWidth, 
+                   bookings[i].time, columnWidth, bookings[i].numberOfPeople, 
+                   columnWidth, bookings[i].totalAmount, columnWidth, bookings[i].status);
+        }
+    }
+
+    personal_printLine();
+    personal_displayCenteredText("Press Enter to return to menu...", terminalWidth, "green");
+    getchar();
+}
 
 void personal_displayQRCode(float amount_due) {
     system("clear");
@@ -388,11 +418,6 @@ void personal_displayQRCode(float amount_due) {
         }
         printf("\n");
     }
-}
-
-
-void personal_printLine() {
-    printf("\n==============================================================================\n\n");
 }
 
 void personal_exitProgram() {
@@ -492,4 +517,13 @@ int personal_getIntInput(char *prompt, int min, int max) {
 void personal_clearInputBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
+}
+
+void freeBookingList() {
+    BookingNode *current = bookingList;
+    while (current) {
+        BookingNode *temp = current;
+        current = current->next;
+        free(temp);
+    }
 }

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <windows.h> // For UTF-8 support
+// #include <windows.h> // For UTF-8 support commented out two lines in this code for mac
 
 #define USE_EMOJIS 1
 
@@ -72,7 +72,7 @@ void decorativeLine(char ch, int length) {
 }
 
 int main() {
-    SetConsoleOutputCP(CP_UTF8); // Enable UTF-8 encoding for Windows console
+    // SetConsoleOutputCP(CP_UTF8); // Enable UTF-8 encoding for Windows console
     int choice;
 
     Event events[5] = {
