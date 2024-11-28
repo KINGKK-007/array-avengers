@@ -12,6 +12,13 @@
 
 ###
 
+<!-- Center the second new image below the first image -->
+<div align="center" style="width: 100%; overflow: hidden; margin-top: 20px;">
+  <img src="https://drive.google.com/uc?export=view&id=1L-CXlXnPdByKnnus9Zzgjw_3aoOak7ri" alt="Second New Image" style="width: 100%; height: auto;"/>
+</div>
+
+###
+
 <div align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="30" alt="python logo"  />
   <img width="12" />
