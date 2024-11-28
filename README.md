@@ -53,14 +53,6 @@
 
 ###
 
-<h3>Listen to the Background Music 🎶</h3>
-
-<!-- Play Audio -->
-<p align="left">
-  <a href="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.mp3" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Audio_icon_1.svg/1024px-Audio_icon_1.svg.png" width="100" alt="Play Audio" />
-  </a>
-</p>
 
 
 
