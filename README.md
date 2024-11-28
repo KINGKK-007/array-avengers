@@ -56,11 +56,18 @@
 <h3>Listen to the Background Music 🎶</h3>
 
 <!-- Embed the audio player with controls -->
-<audio controls>
+<audio id="audio" controls>
   <source src="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.mp3" type="audio/mpeg">
   <source src="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.ogg" type="audio/ogg">
   Your browser does not support the audio element.
 </audio>
+<script>
+  var audio = document.getElementById("audio");
+  if (audio.canPlayType === undefined) {
+    // Fallback for browsers that don't support the audio element
+    alert("Your browser does not support audio playback.");
+  }
+</script>
 
 
 ###
