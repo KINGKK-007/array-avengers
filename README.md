@@ -5,9 +5,9 @@
 
 ###
 
-<!-- Center the new image (provided link) -->
-<div align="center">
-  <img src="https://drive.google.com/uc?export=view&id=1_fbPR8TgG0Vq2hFImX0jvKAt_N5P9c6Y" alt="New Image" style="height: 150px;"/>
+<!-- Center the new image (provided link) and make it fill the entire screen width -->
+<div align="center" style="width: 100%; overflow: hidden;">
+  <img src="https://drive.google.com/uc?export=view&id=1_fbPR8TgG0Vq2hFImX0jvKAt_N5P9c6Y" alt="New Image" style="width: 100%; height: auto;"/>
 </div>
 
 ###
