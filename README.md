@@ -51,7 +51,14 @@
   </a>
 </div>
 
+###
 
+<h3>Listen to the Event Manager Background Music 🎶</h3>
+
+<p align="left">Here's a link to the background music that enhances the experience while exploring the Event Manager System. Feel free to play it while navigating through the project!</p>
+
+<!-- Link to your background music -->
+[Listen to the Background Music]()
 
 ###
 
