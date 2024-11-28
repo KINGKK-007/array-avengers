@@ -105,6 +105,21 @@ void Alogin() {
 
 }
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BUFFER_SIZE 1024
+#define CYAN "\033[36m"
+#define RESET "\033[0m"
+#define GREEN "\033[32m"
+#define RED "\033[31m"
+
+// Function to clear the input buffer (example placeholder)
+void clearScreen() {
+    printf("\033[H\033[J");
+}
+
 void signUp() {
     char adminId[6], adminName[50], adminPhone[15], adminPassword[50];
     char buffer[BUFFER_SIZE];
@@ -119,7 +134,6 @@ void signUp() {
     scanf("%5s", adminId);
 
     if (adminId[0] != 'A' || strlen(adminId) != 5) {
-        
         printf(RED "Invalid Admin ID format. It must start with 'A' and be 5 letters long.\n" RESET);
         fclose(readFile);
         return;
@@ -141,8 +155,13 @@ void signUp() {
         return;
     }
 
+    // Clear the buffer before reading the name (to handle the leftover newline character from previous scanf)
+    getchar();
+
     printf(CYAN "Enter Admin Name: " RESET);
-    scanf(" %[^\n]", adminName);
+    // Read the admin name, including spaces
+    fgets(adminName, sizeof(adminName), stdin);
+    adminName[strcspn(adminName, "\n")] = '\0';  // Remove newline from the end of the string
 
     while (1) {
         printf(CYAN "Enter Admin Phone Number (10 digits): " RESET);
@@ -155,9 +174,15 @@ void signUp() {
         }
     }
 
-    printf(CYAN "Enter Admin Password: " RESET);
-    scanf(" %[^\n]", adminPassword);
+    // Clear the buffer before reading the password
+    getchar();
 
+    printf(CYAN "Enter Admin Password: " RESET);
+    // Read the password, including spaces
+    fgets(adminPassword, sizeof(adminPassword), stdin);
+    adminPassword[strcspn(adminPassword, "\n")] = '\0';  // Remove newline from the end of the string
+
+    // Append the new admin data to the file
     fprintf(file, "%s,%s,%s,%s\n", adminId, adminName, adminPhone, adminPassword);
     fclose(file);
 
@@ -176,17 +201,32 @@ int logIn() {
         return 0;
     }
 
+    // Clear the input buffer before reading user inputs
     printf(CYAN "Enter Admin ID: " RESET);
-    scanf("%5s", adminId);
+    if (scanf("%5s", adminId) != 1) {
+        printf(RED "Error reading Admin ID\n" RESET);
+        fclose(file);
+        return 0;
+    }
 
+    // Clear the input buffer before reading the password
     printf(CYAN "Enter Admin Password: " RESET);
-    scanf(" %[^\n]", adminPassword);
+    getchar();  // Consume the newline left in the buffer by previous scanf
+    if (fgets(adminPassword, sizeof(adminPassword), stdin) == NULL) {
+        printf(RED "Error reading Admin Password\n" RESET);
+        fclose(file);
+        return 0;
+    }
+
+    // Remove the trailing newline character left by fgets
+    adminPassword[strcspn(adminPassword, "\n")] = '\0';
+
     clearScreen();
 
     while (fgets(buffer, sizeof(buffer), file)) {
         char *fileAdminId = strtok(buffer, ",");
-        strtok(NULL, ","); 
-        strtok(NULL, ","); 
+        strtok(NULL, ","); // Skip unused fields
+        strtok(NULL, ",");
         char *fileAdminPassword = strtok(NULL, "\n");
 
         if (fileAdminId != NULL) fileAdminId[strcspn(fileAdminId, "\r\n")] = '\0';
@@ -211,7 +251,6 @@ int logIn() {
 
     return found;
 }
-
 void viewEventDetails() {
     int subChoice;
     printf("\n" CYAN "View Event Details Options" RESET "\n");
@@ -413,6 +452,7 @@ void viewCustomerDetails() {
 
     fclose(file);
 }
+// Define a structure for Booking
 typedef struct {
     char genre[100];
     char subgenre[100];
@@ -421,53 +461,107 @@ typedef struct {
     char status[10];
 } Booking;
 
-// Function to compare two dates (for sorting in descending order)
+// Define a node in the linked list for Booking
+typedef struct BookingNode {
+    Booking booking;
+    struct BookingNode *next;
+} BookingNode;
+
+// Function to create a new booking node
+BookingNode* createNode(Booking booking) {
+    BookingNode *newNode = (BookingNode*)malloc(sizeof(BookingNode));
+    if (newNode) {
+        newNode->booking = booking;
+        newNode->next = NULL;
+    }
+    return newNode;
+}
+
+// Function to add a booking to the linked list
+void addBooking(BookingNode **head, Booking booking) {
+    BookingNode *newNode = createNode(booking);
+    if (*head == NULL) {
+        *head = newNode;
+    } else {
+        BookingNode *temp = *head;
+        while (temp->next) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+    }
+}
+
+// Function to compare two dates (for sorting)
 int compareDates(const void *a, const void *b) {
     return strcmp(((Booking*)b)->date, ((Booking*)a)->date);  // Sort descending (latest first)
 }
 
-// Function to show the latest 10 bookings
-void showtenBookings() {
+// Function to display bookings from the linked list
+void displayBookings(BookingNode *head) {
+    printf("\n"CYAN "%-20s %-25s %-15s %-19s %-10s\n", "Genre", "Subgenre", "Customer Phone", "Date", "Status");
+    printf(CYAN "----------------------------------------------------------------------------\n");
+
+    while (head) {
+        printf(PINK "%-20s %-25s %-15s %-15s %-10s\n",
+               head->booking.genre,
+               head->booking.subgenre,
+               head->booking.customerPhone,
+               head->booking.date,
+               head->booking.status);
+        head = head->next;
+    }
+    printf(RESET);
+}
+
+// Function to show the latest 10 bookings from the linked list
+void showTenBookings() {
     FILE *file = fopen("bookings.csv", "r");
     if (!file) {
         perror(RED "Unable to open bookings.csv");
         return;
     }
 
-    Booking bookings[MAX_BOOKINGS];
+    BookingNode *head = NULL;
+    char line[MAX_LINE_LENGTH];
     int bookingCount = 0;
 
-    char line[MAX_LINE_LENGTH];
-    
-    // Read the CSV file line by line
+    // Read the CSV file line by line and add each booking to the linked list
     while (fgets(line, sizeof(line), file)) {
-        if (bookingCount >= MAX_BOOKINGS) break;  // Stop if we've reached the limit
+        Booking booking;
+        sscanf(line, "%99[^,],%99[^,],%19[^,],%19[^,],%9[^,]",
+               booking.genre,
+               booking.subgenre,
+               booking.customerPhone,
+               booking.date,
+               booking.status);
 
-        // Parse the CSV line into relevant fields
-        sscanf(line, "%99[^,],%99[^,],%19[^,],%19[^,],%*s,%*s,%*s,%*s,%*s,%9[^,],%*s",
-               bookings[bookingCount].genre,
-               bookings[bookingCount].subgenre,
-               bookings[bookingCount].customerPhone,
-               bookings[bookingCount].date,
-               bookings[bookingCount].status);
-
+        addBooking(&head, booking);
         bookingCount++;
     }
 
     fclose(file);
 
-    // Sort the bookings by date (latest first)
-    qsort(bookings, bookingCount, sizeof(Booking), compareDates);
+    // Sort the linked list based on the booking date (latest first)
+    BookingNode *temp = head;
+    BookingNode *arr[bookingCount];
+    int i = 0;
 
-    // Print the table header
-    printf("\n"CYAN "%-20s %-25s %-15s %-19s %-10s\n", "Genre", "Subgenre", "Customer Phone", "Date"," ");
-    printf(CYAN "----------------------------------------------------------------------------\n");
-
-    // Print the latest 10 bookings or as many as available
-    int count = bookingCount < 10 ? bookingCount : 10;
-    for (int i = 0; i < count; i++) {
-        printf(MAGENTA "%-20s %-25s %-15s %-15s %-10s\n", bookings[i].genre, bookings[i].subgenre, bookings[i].customerPhone, bookings[i].date,bookings[i].status);
+    while (temp) {
+        arr[i++] = temp;
+        temp = temp->next;
     }
+
+    qsort(arr, bookingCount, sizeof(BookingNode*), compareDates);
+
+    // Reconstruct the sorted linked list
+    head = arr[0];
+    for (i = 1; i < bookingCount; i++) {
+        arr[i - 1]->next = arr[i];
+    }
+    arr[bookingCount - 1]->next = NULL;
+
+    // Display the sorted bookings (latest first)
+    displayBookings(head);
 }
 void viewAllContractors() {
     FILE *file = fopen("contractors.csv", "r");
@@ -657,7 +751,6 @@ void assignContractorsToCustomers() {
     }
 }
 
-
 void displayMenu() {
     int choice;
 
@@ -674,8 +767,9 @@ void displayMenu() {
         AdminCenteredText("[1] Assign Contractors to Customers", width, BLUE);
         AdminCenteredText("[2] View Event Details", width, GREEN);
         AdminCenteredText("[3] View Customer Details", width, PINK);
-        // AdminCenteredText("[4] Customer Query", width, CYAN);
-        AdminCenteredText("[4]. Log Out", width, RED);
+        AdminCenteredText("[4] Show latest ten Bookings", width, CYAN);
+        AdminCenteredText("[5]. Log Out", width, RED);
+        // AdminCenteredText("[6] Customer Query", width, CYAN);
         printf(WHITE "Enter your choice: " RESET);
         scanf("%d", &choice);
         clearScreen();
@@ -693,6 +787,9 @@ void displayMenu() {
                 viewCustomerDetails();
                 break;
             case 4:
+                showTenBookings();
+                break;
+            case 5:
                 AdminCenteredText("Logging out...\n", width, RED);
                 return;
                 break;

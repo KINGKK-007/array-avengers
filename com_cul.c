@@ -267,7 +267,7 @@ void com_cat_display()
 
     // Display header
     printf("\n");
-    com_displayCenteredText("\xF0\x9F\xA9\xBA Event Categories", width, MAGENTA BOLD); // 🩺
+    com_displayCenteredText("\xF0\x9F\x8C\x8D Event Categories", width, MAGENTA BOLD); // 🌍 Event Categories
     printf("\n");
     for (int i = 0; i < width; i++) // Print top border
         printf("%s=%s", CYAN, RESET);

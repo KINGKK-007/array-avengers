@@ -8,3 +8,5 @@ Health and Wellness,Health Check-up Camp,9999900006,2024/12/03,f,00:00,67,2345,2
 Corporate,Business Conferences,9999900007,2020-09-08,iitb,00:00,78,1500,150,1650,paid,ok
 Corporate,Product Launches,9999900008,2024-07-06,iitb,09:09,100,1500,140,1640,paid,ok
 Corporate,Team Building Activities,9999900009,2024-01-01,iti,09:09,200,2000,200,2200,paid,ok
+Event Name,Description,Date,Mobile Number,Time,Venue,Number of People,Fee Per Person,Total Before GST,GST Amount,Total Amount,Status
+Weddings,Make your wedding memorable.,12/12/2024,7696911826,3:30,chd,67,2000.00,134000.00,24120.00,158120.00,Approved

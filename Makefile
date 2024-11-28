@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -arch arm64  # Add any other flags you need
+CFLAGS = -w -arch arm64  
 OBJ = main.o user.o global_user.o corp.o prof.o edu_aca.o com_cul.o personalCeleb.o health.o admin.o adminChooser.o master_admin.o contractor.o # Include all object files
 
 TARGET = program

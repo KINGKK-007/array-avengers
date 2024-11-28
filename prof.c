@@ -207,7 +207,7 @@ void prof_main()
 
         // Display the header
         prof_displayBanner(width);
-        prof_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO prof EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        prof_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO PROFESSIONAL EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         prof_displayBanner(width);
 
         // Menu options
@@ -267,7 +267,7 @@ void prof_cat_display()
 
     // Display header
     printf("\n");
-    prof_displayCenteredText("\xF0\x9F\xA9\xBA Event Categories", width, MAGENTA BOLD); // 🩺
+    prof_displayCenteredText("\xF0\x9F\x92\xBC Event Categories", width, MAGENTA BOLD); // 💼 Event Categories
     printf("\n");
     for (int i = 0; i < width; i++) // Print top border
         printf("%s=%s", CYAN, RESET);
