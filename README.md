@@ -53,7 +53,7 @@
   <li>edu.c – Manages educational event categories and bookings.</li>
   <li>user.c – Manages user login, registration, and displays event categories.</li>
   <li>contractor.c – Manages contractor login, task assignment, and progress tracking.</li>
-  <li>utils.c – Utility functions for terminal display, color formatting, etc.</li>
+ 
 </ul>
 
 ###
