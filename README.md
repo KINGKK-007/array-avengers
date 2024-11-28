@@ -55,19 +55,15 @@
 
 <h3>Listen to the Background Music 🎶</h3>
 
-<!-- Embed the audio player with controls -->
-<audio id="audio" controls>
-  <source src="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.mp3" type="audio/mpeg">
-  <source src="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.ogg" type="audio/ogg">
-  Your browser does not support the audio element.
-</audio>
-<script>
-  var audio = document.getElementById("audio");
-  if (audio.canPlayType === undefined) {
-    // Fallback for browsers that don't support the audio element
-    alert("Your browser does not support audio playback.");
-  }
-</script>
+<!-- Play Audio -->
+<p align="left">
+  <a href="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.mp3" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Audio_icon_1.svg/1024px-Audio_icon_1.svg.png" width="100" alt="Play Audio" />
+  </a>
+</p>
+
+
+
 
 
 ###
