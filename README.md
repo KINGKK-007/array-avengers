@@ -53,13 +53,14 @@
 
 ###
 
-<h3>Listen to the Event Manager Background Music 🎶</h3>
+<h3>Listen to the Background Music 🎶</h3>
 
-<p align="left">Here's a link to the background music that enhances the experience while exploring the Event Manager System. Feel free to play it while navigating through the project!</p>
+<!-- Embed the audio player with controls -->
+<audio controls>
+  <source src="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
 
-<!-- Link to your background music -->
-[Listen to the Background Music](https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.mp3
-)
 
 ###
 
