@@ -8,6 +8,7 @@
 #include "edu_aca.h"
 #include "prof.h"
 #include "corp.h"
+#include "global_user.h"
 
 // ANSI color codes for macOS/Linux
 #define RESET "\033[0m"
@@ -40,10 +41,11 @@ void userLogin();
 char name[100], city[100], email[100];
 int customer_number, enter_password, reenter_password;
 
-
-void save_user_to_csv(const char *name, const char *city, int number, int password, const char *email) {
+void save_user_to_csv(const char *name, const char *city, int number, int password, const char *email)
+{
     FILE *file = fopen(CSV_FILE, "a");
-    if (!file) {
+    if (!file)
+    {
         printf("Error: Could not open CSV file for writing.\n");
         exit(1);
     }
@@ -51,16 +53,20 @@ void save_user_to_csv(const char *name, const char *city, int number, int passwo
     fclose(file);
 }
 
-int check_email_in_csv(const char *email) {
+int check_email_in_csv(const char *email)
+{
     FILE *file = fopen(CSV_FILE, "r");
-    if (!file) return 0; // If file doesn't exist, assume no duplicate
+    if (!file)
+        return 0; // If file doesn't exist, assume no duplicate
 
     char line[256];
     char stored_email[100];
 
-    while (fgets(line, sizeof(line), file)) {
+    while (fgets(line, sizeof(line), file))
+    {
         sscanf(line, "%*[^,],%*[^,],%*d,%*d,%99[^,\n]", stored_email); // Extract the email
-        if (strcmp(stored_email, email) == 0) {
+        if (strcmp(stored_email, email) == 0)
+        {
             fclose(file);
             return 1; // Email found
         }
@@ -70,16 +76,20 @@ int check_email_in_csv(const char *email) {
     return 0; // Email not found
 }
 
-int check_number_in_csv(int number) {
+int check_number_in_csv(int number)
+{
     FILE *file = fopen(CSV_FILE, "r");
-    if (!file) return 0; // If file doesn't exist, assume no duplicate
+    if (!file)
+        return 0; // If file doesn't exist, assume no duplicate
 
     char line[256];
     int stored_number;
 
-    while (fgets(line, sizeof(line), file)) {
+    while (fgets(line, sizeof(line), file))
+    {
         sscanf(line, "%*[^,],%*[^,],%d,%*d", &stored_number); // Extract the number
-        if (stored_number == number) {
+        if (stored_number == number)
+        {
             fclose(file);
             return 1; // Number found
         }
@@ -89,10 +99,12 @@ int check_number_in_csv(int number) {
     return 0; // Number not found
 }
 
-void user_up() {
+void user_up()
+{
     int width = user_getTerminalWidth(); // Get terminal width for centering
 
-    while (1) {
+    while (1)
+    {
         system("clear");
         printf("\n");
         user_displayCenteredText("\xF0\x9F\x93\x9D User Sign Up", width, CYAN); // 📝
@@ -117,25 +129,33 @@ void user_up() {
         scanf("%d", &customer_number);
 
         // Check if number exists
-        if (check_number_in_csv(customer_number)) {
+        if (check_number_in_csv(customer_number))
+        {
             user_displayCenteredText("\xF0\x9F\x98\x95 Number already found in database. Choose an option below:", width, RED); // 😕
             printf("\n");
-            user_displayCenteredText("[\xF0\x9F\x85\x9F] Sign in", width, CYAN);    // 1️⃣
-            user_displayCenteredText("[\xF0\x9F\x85\xA0] Create new account", width, CYAN); // 2️⃣
-            user_displayCenteredText("[\xF0\x9F\x85\xA1] Exit", width, CYAN);      // 3️⃣
+            user_displayCenteredText("1️⃣. Sign in", width, CYAN);            // 1️⃣
+            user_displayCenteredText("2️⃣. Create new account", width, CYAN); // 2️⃣
+            user_displayCenteredText("3️⃣. Exit", width, CYAN);               // 3️⃣
             printf("\n%s> %s", BOLD, RESET);
-            
+
             int choice;
             scanf("%d", &choice);
 
-            if (choice == 1) {
+            if (choice == 1)
+            {
                 user_in();
                 return;
-            } else if (choice == 2) {
+            }
+            else if (choice == 2)
+            {
                 user_up();
-            } else if (choice == 3) {
+            }
+            else if (choice == 3)
+            {
                 exit(0);
-            } else {
+            }
+            else
+            {
                 user_displayCenteredText("Invalid choice! Returning to sign-up menu.", width, RED);
                 usleep(2000000); // Pause for 2 seconds
             }
@@ -143,21 +163,26 @@ void user_up() {
 
         // Prompt for email ID
         getchar(); // Clear newline character left in the buffer
-        while (1) {
+        while (1)
+        {
             user_displayCenteredText("Enter your email ID:", width, YELLOW);
             printf("%s> %s", BOLD, RESET);
             fgets(email, sizeof(email), stdin);
             email[strcspn(email, "\n")] = '\0';
 
-            if (check_email_in_csv(email)) {
+            if (check_email_in_csv(email))
+            {
                 user_displayCenteredText("\xF0\x9F\x98\x95 Email already exists. Please enter a different email ID.", width, RED); // 😕
-            } else {
+            }
+            else
+            {
                 break;
             }
         }
 
         // Prompt for password
-        while (1) {
+        while (1)
+        {
             user_displayCenteredText("Enter your password:", width, YELLOW);
             printf("%s> %s", BOLD, RESET);
             scanf("%d", &enter_password);
@@ -166,12 +191,16 @@ void user_up() {
             printf("%s> %s", BOLD, RESET);
             scanf("%d", &reenter_password);
 
-            if (enter_password != reenter_password) {
+            if (enter_password != reenter_password)
+            {
                 user_displayCenteredText("\xF0\x9F\x98\x9F Passwords do not match. Please try again.", width, RED); // 😟
-            } else {
+            }
+            else
+            {
                 save_user_to_csv(name, city, customer_number, enter_password, email);
                 user_displayCenteredText("\xF0\x9F\x8E\x89 Registration successful!", width, GREEN); // 🎉
-                usleep(2000000); // Pause for 2 seconds
+                usleep(2000000);                                                                     // Pause for 2 seconds
+                mobile_number = customer_number;  
                 user_first_page();
                 return;
             }
@@ -230,13 +259,13 @@ void user_in()
         {
             printf("\n");
             char welcome_msg[200];
-            snprintf(welcome_msg, sizeof(welcome_msg), 
+            snprintf(welcome_msg, sizeof(welcome_msg),
                      "\xF0\x9F\x8E\x89 Login successful! Welcome back, %s from %s.", stored_name, stored_city);
             user_displayCenteredText(welcome_msg, width, GREEN); // 🎉
             fclose(file);
             sleep(2);
 
-            // Redirect to the user first page
+            mobile_number = customer_number;
             user_first_page();
             return;
         }
@@ -248,7 +277,6 @@ void user_in()
     user_displayCenteredText("\xF0\x9F\x98\xB1 Invalid credentials. Please try again or sign up if you don't have an account.", width, RED); // 😱
     sleep(2);
 }
-
 
 void userLogin()
 {
@@ -266,9 +294,9 @@ void userLogin()
         user_displayWelcomeBanner(width);
 
         // Menu options with emojis
-        user_displayCenteredText("\xF0\x9F\x85\x9F Sign in / Log in\n", width, GREEN); // 1️⃣
-        user_displayCenteredText("\xF0\x9F\x86\x90 Sign up / Log up\n", width, YELLOW); // 2️⃣
-        user_displayCenteredText("\xF0\x9F\x85\x91 Exit\n", width, RED); // 3️⃣
+        user_displayCenteredText("1️⃣. Sign in / Log in\n", width, GREEN);  // 1️⃣
+        user_displayCenteredText("2️⃣. Sign up / Log up\n", width, YELLOW); // 2️⃣
+        user_displayCenteredText("3️⃣. Exit\n", width, RED);                // 3️⃣
 
         // Prompt for user input
         printf("\n%sEnter your choice: %s", BOLD, RESET);
@@ -344,13 +372,12 @@ void user_first_page()
         user_displayWelcomeBanner(width);
 
         // Menu options
-        user_displayCenteredText(" Personal Development\n", width, GREEN); // all done.
-        user_displayCenteredText("\xF0\x9F\x86\x90 Community and Cultural Events\n", width, YELLOW); // done only ui 
-        user_displayCenteredText("\xF0\x9F\x85\x91 Educational and Academic Events\n", width, CYAN); // done mine
-        user_displayCenteredText("\xF0\x9F\x85\x92 Professional Development\n", width, BLUE); // done mine
-        user_displayCenteredText("\xF0\x9F\x85\x93 Health and Wellness Events\n", width, MAGENTA); // done mine
-        user_displayCenteredText("\xF0\x9F\x85\x94 Corporate Events\n", width, RED); // done mine
-        user_displayCenteredText("\xF0\x9F\x85\x95 Others\n", width, GREEN);
+        user_displayCenteredText("1️⃣. Personal Development\n", width, GREEN);                           // all done.
+        user_displayCenteredText("2️⃣. Community and Cultural Events\n", width, YELLOW); // done only ui
+        user_displayCenteredText("3️⃣. Educational and Academic Events\n", width, CYAN); // done mine
+        user_displayCenteredText("4️⃣. Professional Development\n", width, BLUE);        // done mine
+        user_displayCenteredText("5️⃣. Health and Wellness Events\n", width, MAGENTA);   // all done
+        user_displayCenteredText("6️⃣. Corporate Events\n", width, RED);                 // done mine
 
         // Prompt for user input
         printf("\n%sEnter your choice: %s", BOLD, RESET);
@@ -386,12 +413,6 @@ void user_first_page()
         case 6:
             corp_main();
             printf("\n");
-            sleep(2); // Wait for 2 seconds
-            break;
-        case 7:
-            // others();
-            printf("\n");
-            user_displayCenteredText("[Feature Coming Soon: Others]", width, CYAN);
             sleep(2); // Wait for 2 seconds
             break;
         default:

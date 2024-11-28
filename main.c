@@ -71,10 +71,10 @@ void MainMenu()
         displayWelcomeBanner(width);
 
         // Menu options
-        displayCenteredText("\xF0\x9F\x85\x9F User Login\n", width, GREEN);
-        displayCenteredText("\xF0\x9F\x86\x90 Admin Login\n", width, YELLOW);
-        displayCenteredText("\xF0\x9F\x85\x91] Contractor Login\n", width, BLUE);
-        displayCenteredText("\xF0\x9F\x85\x92 Exit\n", width, RED);
+        displayCenteredText("1️⃣. User Login\n", width, GREEN);
+        displayCenteredText("2️⃣. Admin Login\n", width, YELLOW);
+        displayCenteredText("3️⃣. Contractor Login\n", width, BLUE);
+        displayCenteredText("4️⃣. Exit\n", width, RED);
 
         printf("\n%sEnter your choice: %s", BOLD, RESET);
         scanf("%d", &choice);
@@ -107,8 +107,6 @@ void MainMenu()
         }
     }
 }
-
-
 
 // Main function
 int main()

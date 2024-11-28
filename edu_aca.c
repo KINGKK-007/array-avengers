@@ -31,7 +31,8 @@ void edu_clearInputBuffer();
 int edu_getTerminalWidth();
 
 // Booking structure
-typedef struct {
+typedef struct
+{
     char eventName[50];
     char date[15];
     char venue[50];
@@ -45,7 +46,8 @@ typedef struct {
     char status[20];
 } edu_Booking;
 
-typedef struct edu_BookingNode {
+typedef struct edu_BookingNode
+{
     edu_Booking data;
     struct edu_BookingNode *next;
 } edu_BookingNode;
@@ -56,15 +58,18 @@ edu_Booking bookings[MAX_BOOKINGS];
 int edu_bookingCount = 0;
 
 // Event structure
-typedef struct {
+typedef struct
+{
     char name[50];
     char description[255];
     float feePerPerson;
 } Event;
 
-void edu_saveBookingsToCSV() {
-    FILE *file = fopen("edu.csv", "a");
-    if (!file) {
+void edu_saveBookingsToCSV()
+{
+    FILE *file = fopen("Bookings.csv", "a");
+    if (!file)
+    {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
         return;
     }
@@ -73,7 +78,8 @@ void edu_saveBookingsToCSV() {
     fprintf(file, "Event Name,Description,Date,Time,Venue,Number of People,Fee Per Person,Total Before GST,GST Amount,Total Amount,Status\n");
 
     // Write each booking
-    for (int i = 0; i < edu_bookingCount; i++) {
+    for (int i = 0; i < edu_bookingCount; i++)
+    {
         fprintf(file, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%.2f,%.2f,%.2f,%.2f,\"%s\"\n",
                 bookings[i].eventName,
                 bookings[i].description,
@@ -89,13 +95,15 @@ void edu_saveBookingsToCSV() {
     }
 
     fclose(file);
-    printf("\033[1;32mBookings saved successfully to %s\033[0m\n", "eduCeleb.csv");
+    printf("\033[1;32mBookings saved successfully to %s\033[0m\n", "Bookings.csv");
 }
 
 // Function to load bookings from a CSV file
-void edu_loadBookingsFromCSV() {
-    FILE *file = fopen("edu_aca.csv", "r");
-    if (file == NULL) {
+void edu_loadBookingsFromCSV()
+{
+    FILE *file = fopen("Bookings.csv", "r");
+    if (file == NULL)
+    {
         printf("\033[1;33mNo existing booking file found. Starting fresh.\033[0m\n");
         return;
     }
@@ -106,7 +114,8 @@ void edu_loadBookingsFromCSV() {
     // Skip the CSV header
     fgets(line, sizeof(line), file);
 
-    while (fgets(line, sizeof(line), file)) {
+    while (fgets(line, sizeof(line), file))
+    {
         lineCount++;
         edu_Booking newBooking;
         char *token;
@@ -153,9 +162,8 @@ void edu_loadBookingsFromCSV() {
     }
 
     fclose(file);
-    printf("\033[1;32m%d bookings loaded from edu_aca.csv.\033[0m\n", lineCount);
+    printf("\033[1;32m%d bookings loaded from Bookings.csv.\033[0m\n", lineCount);
 }
-
 
 // Array of Events
 Event edu_events[] = {
@@ -168,23 +176,30 @@ Event edu_events[] = {
     {"Career Fairs and Networking Events", "Connect with potential employers.", 1000.0},
 };
 
-void edu_printLine() {
+void edu_printLine()
+{
     printf("\033[1;36m%s\033[0m\n", "=======================================================");
 }
 
-void edu_displayCenteredText(const char* text, int width, const char* color) {
+void edu_displayCenteredText(const char *text, int width, const char *color)
+{
     int padding = (width - (int)strlen(text)) / 2;
-    for (int i = 0; i < padding; i++) printf(" ");
+    for (int i = 0; i < padding; i++)
+        printf(" ");
     printf("%s%s%s\n", color, text, RESET);
 }
 
-void edu_displayBanner(int width) {
-    for (int i = 0; i < width; i++) printf("\033[1;36m=\033[0m");
+void edu_displayBanner(int width)
+{
+    for (int i = 0; i < width; i++)
+        printf("\033[1;36m=\033[0m");
     printf("\n");
 }
 
-void edu_main() {
-    while (1) {
+void edu_main()
+{
+    while (1)
+    {
         int choice;
         int width = edu_getTerminalWidth(); // Get terminal width for dynamic adjustments
 
@@ -198,9 +213,9 @@ void edu_main() {
 
         // Menu options
         printf("\n");
-        edu_displayCenteredText("\x31\xE2\x83\xA3  Book an Event", width, YELLOW BOLD);   // 1️⃣
-        edu_displayCenteredText("\x32\xE2\x83\xA3  View All Bookings", width, BLUE);     // 2️⃣
-        edu_displayCenteredText("\x33\xE2\x83\xA3  Exit", width, RED);                   // 3️⃣
+        edu_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
+        edu_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
+        edu_displayCenteredText("3️⃣.  Exit", width, RED);                  // 3️⃣
         printf("\n");
 
         // Footer line
@@ -213,37 +228,38 @@ void edu_main() {
         getchar(); // Clear newline character from input buffer
 
         // Handle user choice
-        switch (choice) {
-            case 1:
-                system("clear");
-                edu_displayCenteredText("\xF0\x9F\x8E\x89 Booking an Event... \xF0\x9F\x8E\x89", width, GREEN); // 🎉
-                edu_bookEvent();
-                sleep(2); // Pause for 2 seconds before showing the next menu
-                break;
+        switch (choice)
+        {
+        case 1:
+            system("clear");
+            edu_displayCenteredText("\xF0\x9F\x8E\x89 Booking an Event... \xF0\x9F\x8E\x89", width, GREEN); // 🎉
+            edu_bookEvent();
+            sleep(2); // Pause for 2 seconds before showing the next menu
+            break;
 
-            case 2:
-                system("clear");
-                edu_displayCenteredText("\xF0\x9F\x93\x8C Viewing All Bookings... \xF0\x9F\x93\x8C", width, BLUE); // 📌
-                edu_viewBookings();
-                sleep(2); // Pause for 2 seconds before showing the next menu
-                break;
+        case 2:
+            system("clear");
+            edu_displayCenteredText("\xF0\x9F\x93\x8C Viewing All Bookings... \xF0\x9F\x93\x8C", width, BLUE); // 📌
+            edu_viewBookings();
+            sleep(2); // Pause for 2 seconds before showing the next menu
+            break;
 
-            case 3:
-                system("clear");
-                edu_saveBookingsToCSV(); // Save bookings before exiting
-                edu_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
-                sleep(2); // Pause for 2 seconds before exiting
-                exit(0);
+        case 3:
+            system("clear");                                                                                  
+            edu_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
+            sleep(2);                                                                                                  // Pause for 2 seconds before exiting
+            exit(0);
 
-            default:
-                system("clear");
-                edu_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
-                sleep(2); // Pause for 2 seconds before returning to menu
+        default:
+            system("clear");
+            edu_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
+            sleep(2);                                                                                                   // Pause for 2 seconds before returning to menu
         }
     }
 }
 
-void edu_cat_display() {
+void edu_cat_display()
+{
     int width = edu_getTerminalWidth(); // Dynamically determine terminal width
 
     // Clear the screen for a fresh UI
@@ -259,7 +275,8 @@ void edu_cat_display() {
 
     // Display event categories
     int numEvents = sizeof(edu_events) / sizeof(edu_events[0]);
-    for (int i = 0; i < numEvents; i++) {
+    for (int i = 0; i < numEvents; i++)
+    {
         char eventLine[200];
         snprintf(eventLine, sizeof(eventLine), "[%d] %s", i + 1, edu_events[i].name);
         edu_displayCenteredText(eventLine, width, GREEN); // Display each event in green
@@ -281,7 +298,8 @@ void edu_cat_display() {
     printf("%s> %s", BOLD, RESET);
 }
 
-int edu_getTerminalWidth() {
+int edu_getTerminalWidth()
+{
     FILE *fp = popen("tput cols", "r");
     if (!fp)
         return 80; // Default width if the edumand fails
@@ -291,7 +309,8 @@ int edu_getTerminalWidth() {
     return width;
 }
 
-void edu_bookEvent() {
+void edu_bookEvent()
+{
     char choiceStr[10];
     int eventChoice;
     edu_Booking newBooking;
@@ -313,13 +332,15 @@ void edu_bookEvent() {
     int numEvents = sizeof(edu_events) / sizeof(edu_events[0]);
 
     // Handle "Go Back" choice
-    if (eventChoice == numEvents + 1) {
+    if (eventChoice == numEvents + 1)
+    {
         edu_goBack();
         return;
     }
 
     // Validate choice
-    if (eventChoice < 1 || eventChoice > numEvents) {
+    if (eventChoice < 1 || eventChoice > numEvents)
+    {
         edu_displayCenteredText("\xF0\x9F\x98\xA5 Invalid choice! Returning to menu... \xF0\x9F\x98\xA5", edu_getTerminalWidth(), RED); // 😥
         getchar();
         return;
@@ -344,15 +365,18 @@ void edu_bookEvent() {
     printf("\033[1;32mFee per Person:\033[0m ₹%.2f\n", selectedEvent.feePerPerson);
 
     // Input Date
-    while (1) {
+    while (1)
+    {
         printf("\033[1;33mEnter Date (DD/MM/YYYY): \033[0m");
         fgets(newBooking.date, sizeof(newBooking.date), stdin);
         strtok(newBooking.date, "\n");
-        if (!edu_isValidDate(newBooking.date)) {
+        if (!edu_isValidDate(newBooking.date))
+        {
             edu_displayCenteredText("\xF0\x9F\x9A\xA8 Invalid date format. Try again! \xF0\x9F\x9A\xA8", edu_getTerminalWidth(), RED); // 🚨
             continue;
         }
-        if (!edu_isFutureDateTime(newBooking.date, "00:00")) {
+        if (!edu_isFutureDateTime(newBooking.date, "00:00"))
+        {
             edu_displayCenteredText("\xF0\x9F\x93\x86 Date must be in the future. Try again! \xF0\x9F\x93\x86", edu_getTerminalWidth(), RED); // 📆
             continue;
         }
@@ -365,15 +389,18 @@ void edu_bookEvent() {
     strtok(newBooking.venue, "\n");
 
     // Input Time
-    while (1) {
+    while (1)
+    {
         printf("\033[1;33mEnter Time (HH:MM): \033[0m");
         fgets(newBooking.time, sizeof(newBooking.time), stdin);
         strtok(newBooking.time, "\n");
-        if (!edu_isValidTime(newBooking.time)) {
+        if (!edu_isValidTime(newBooking.time))
+        {
             edu_displayCenteredText("\xF0\x9F\x94\x8C Invalid time format. Try again! \xF0\x9F\x94\x8C", edu_getTerminalWidth(), RED); // ❌
             continue;
         }
-        if (!edu_isFutureDateTime(newBooking.date, newBooking.time)) {
+        if (!edu_isFutureDateTime(newBooking.date, newBooking.time))
+        {
             edu_displayCenteredText("\xF0\x9F\x95\x93 Time must be in the future. Try again! \xF0\x9F\x95\x93", edu_getTerminalWidth(), RED); // 🕓
             continue;
         }
@@ -405,14 +432,16 @@ void edu_bookEvent() {
     fgets(confirmStr, sizeof(confirmStr), stdin);
     confirm = confirmStr[0];
 
-    if (confirm == 'Y' || confirm == 'y') {
+    if (confirm == 'Y' || confirm == 'y')
+    {
         edu_displayQRCode();
         printf("\033[1;36mPlease pay ₹%.2f\033[0m\n", newBooking.totalAmount);
         edu_displayCenteredText("\xF0\x9F\x92\xB3 Payment made? (Y/N): \xF0\x9F\x92\xB3", edu_getTerminalWidth(), YELLOW); // 💳
         fgets(confirmStr, sizeof(confirmStr), stdin);
         confirm = confirmStr[0];
 
-        if (confirm == 'Y' || confirm == 'y') {
+        if (confirm == 'Y' || confirm == 'y')
+        {
             system("clear");
             edu_displayBanner(edu_getTerminalWidth());
             edu_displayCenteredText("\xF0\x9F\x93\x85 Invoice \xF0\x9F\x93\x85", edu_getTerminalWidth(), GREEN BOLD); // 🗓️
@@ -433,7 +462,9 @@ void edu_bookEvent() {
 
         system("clear");
         edu_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", edu_getTerminalWidth(), GREEN BOLD); // 🎉
-    } else {
+    }
+    else
+    {
         edu_displayCenteredText("\xF0\x9F\x9A\xAB Booking canceled. Returning to menu... \xF0\x9F\x9A\xAB", edu_getTerminalWidth(), RED); // 🚫
     }
 
@@ -441,14 +472,16 @@ void edu_bookEvent() {
     getchar();
 }
 
-void edu_viewBookings() {
+void edu_viewBookings()
+{
     system("clear");
 
     int terminalWidth = edu_getTerminalWidth(); // Dynamically get terminal width
-    int columnWidth = terminalWidth / 8; // Divide into columns (adjust as needed)
+    int columnWidth = terminalWidth / 8;        // Divide into columns (adjust as needed)
 
     // Manually print a line of dashes based on terminal width
-    for (int i = 0; i < terminalWidth; i++) {
+    for (int i = 0; i < terminalWidth; i++)
+    {
         printf("=");
     }
     printf("\n");
@@ -457,22 +490,27 @@ void edu_viewBookings() {
     edu_displayCenteredText("🎟️ All Bookings 🎟️", terminalWidth, MAGENTA BOLD); // 🎟️ All Bookings
 
     // Manually print a line of dashes based on terminal width
-    for (int i = 0; i < terminalWidth; i++) {
+    for (int i = 0; i < terminalWidth; i++)
+    {
         printf("=");
     }
     printf("\n");
 
-    if (edu_bookingCount == 0) {
+    if (edu_bookingCount == 0)
+    {
         // If no bookings found, show error message in red
         edu_displayCenteredText("❌ No bookings found. ❌", terminalWidth, RED);
-    } else {
+    }
+    else
+    {
         // Table header with dynamic column widths and emojis for each column
         printf("\n");
         edu_displayCenteredText("📑 Event Details 📑", terminalWidth, YELLOW);
         printf("\n");
 
         // Manually print a line of dashes based on terminal width
-        for (int i = 0; i < terminalWidth; i++) {
+        for (int i = 0; i < terminalWidth; i++)
+        {
             printf("=");
         }
         printf("\n");
@@ -484,13 +522,15 @@ void edu_viewBookings() {
                "No. of People", columnWidth, "Amount Paid", columnWidth, "Status");
 
         // Manually print a line of dashes based on terminal width
-        for (int i = 0; i < terminalWidth; i++) {
+        for (int i = 0; i < terminalWidth; i++)
+        {
             printf("=");
         }
         printf("\n");
 
         // Loop through and display all bookings in a neat table format
-        for (int i = 0; i < edu_bookingCount; i++) {
+        for (int i = 0; i < edu_bookingCount; i++)
+        {
             // Display booking details for each entry
             printf("%-*d %-*s %-*s %-*s %-*s %-*d ₹%-*0.2f %-*s\n",
                    columnWidth, i + 1, columnWidth, bookings[i].eventName,
@@ -501,7 +541,8 @@ void edu_viewBookings() {
     }
 
     // Manually print a line of dashes based on terminal width
-    for (int i = 0; i < terminalWidth; i++) {
+    for (int i = 0; i < terminalWidth; i++)
+    {
         printf("=");
     }
     printf("\n");
@@ -511,7 +552,8 @@ void edu_viewBookings() {
     getchar(); // Wait for user input to return to the menu
 }
 
-void edu_displayQRCode() {
+void edu_displayQRCode()
+{
     system("clear");
     edu_printLine();
     printf("\t\t\tScan QR Code to Pay\n");
@@ -519,26 +561,33 @@ void edu_displayQRCode() {
 
     srand(time(0));
 
-    for (int j=0; j<30; j++){
-        for (int i=0; i<30; i++){
-            if ( (j==2&&i>1&&i<9) || (j==8&&i>1&&i<9) || (j==2&&i<28&&i>20) || (j==8&&i<28&&i>20) ||
-                      (i==2&&j>1&&j<9) || (i==8&&j>1&&j<9) || (i==2&&j<28&&j>20) || (i==8&&j<28&&j>20) ||
-                      (j==27&&i>1&&i<9) || (j==21&&i>1&&i<9) || (i==27&&j>1&&j<9) || (i==21&&j>1&&j<9) ||
-                      (j==4&&i>3&&i<7) || (j==6&&i>3&&i<7) || (j==4&&i<26&&i>22) || (j==6&&i<26&&i>22) ||
-                      (i==4&&j>3&&j<7) || (i==6&&j>3&&j<7) || (i==4&&j<26&&j>22) || (i==6&&j<26&&j>22) ||
-                      (j==25&&i>3&&i<7) || (j==23&&i>3&&i<7) || (i==23&&j>3&&j<7) || (i==23&&j>3&&j<7) ||
-                      (i==5&&j==5) || (i==25&&j==5) || (i==24&&j==5)|| (i==5&&j==24)
-                        ){
+    for (int j = 0; j < 30; j++)
+    {
+        for (int i = 0; i < 30; i++)
+        {
+            if ((j == 2 && i > 1 && i < 9) || (j == 8 && i > 1 && i < 9) || (j == 2 && i < 28 && i > 20) || (j == 8 && i < 28 && i > 20) ||
+                (i == 2 && j > 1 && j < 9) || (i == 8 && j > 1 && j < 9) || (i == 2 && j < 28 && j > 20) || (i == 8 && j < 28 && j > 20) ||
+                (j == 27 && i > 1 && i < 9) || (j == 21 && i > 1 && i < 9) || (i == 27 && j > 1 && j < 9) || (i == 21 && j > 1 && j < 9) ||
+                (j == 4 && i > 3 && i < 7) || (j == 6 && i > 3 && i < 7) || (j == 4 && i < 26 && i > 22) || (j == 6 && i < 26 && i > 22) ||
+                (i == 4 && j > 3 && j < 7) || (i == 6 && j > 3 && j < 7) || (i == 4 && j < 26 && j > 22) || (i == 6 && j < 26 && j > 22) ||
+                (j == 25 && i > 3 && i < 7) || (j == 23 && i > 3 && i < 7) || (i == 23 && j > 3 && j < 7) || (i == 23 && j > 3 && j < 7) ||
+                (i == 5 && j == 5) || (i == 25 && j == 5) || (i == 24 && j == 5) || (i == 5 && j == 24))
+            {
                 printf("██");
             }
-            else if ( (j>1&&j<28&&i>9&&i<20) || (i>1&&i<28&&j>9&&j<20) || (j>19&&j<28&&i>19&&i<28)){
-            if (rand()%2==0) {
-                printf("██");
-            } else {
-                printf("  ");
+            else if ((j > 1 && j < 28 && i > 9 && i < 20) || (i > 1 && i < 28 && j > 9 && j < 20) || (j > 19 && j < 28 && i > 19 && i < 28))
+            {
+                if (rand() % 2 == 0)
+                {
+                    printf("██");
+                }
+                else
+                {
+                    printf("  ");
+                }
             }
-        }
-            else {
+            else
+            {
                 printf("  ");
             }
         }
@@ -547,19 +596,22 @@ void edu_displayQRCode() {
     edu_printLine();
 }
 
-void edu_exitProgram() {
+void edu_exitProgram()
+{
     printf("\nExiting...\n");
     exit(0);
 }
 
-void edu_goBack() {
+void edu_goBack()
+{
     printf("\nGoing back...\n");
     printf("Press Enter to continue...");
     getchar();
 }
 
 // Function to validate date format and values
-int edu_isValidDate(char *dateStr) {
+int edu_isValidDate(char *dateStr)
+{
     int day, month, year;
     if (sscanf(dateStr, "%d/%d/%d", &day, &month, &year) != 3)
         return 0;
@@ -570,12 +622,15 @@ int edu_isValidDate(char *dateStr) {
     if (day < 1 || day > 31)
         return 0;
     // Check for months with fewer days
-    if (month == 2) {
+    if (month == 2)
+    {
         // Leap year check
         int isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
         if (day > (isLeap ? 29 : 28))
             return 0;
-    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+    }
+    else if (month == 4 || month == 6 || month == 9 || month == 11)
+    {
         if (day > 30)
             return 0;
     }
@@ -583,7 +638,8 @@ int edu_isValidDate(char *dateStr) {
 }
 
 // Function to validate time format and values
-int edu_isValidTime(char *timeStr) {
+int edu_isValidTime(char *timeStr)
+{
     int hour, minute;
     if (sscanf(timeStr, "%d:%d", &hour, &minute) != 2)
         return 0;
@@ -595,14 +651,16 @@ int edu_isValidTime(char *timeStr) {
 }
 
 // Function to check if the date and time are in the future
-int edu_isFutureDateTime(char *dateStr, char *timeStr) {
+int edu_isFutureDateTime(char *dateStr, char *timeStr)
+{
     struct tm eventTime = {0};
     time_t currentTime;
     time(&currentTime);
 
     int day, month, year, hour = 0, minute = 0;
     sscanf(dateStr, "%d/%d/%d", &day, &month, &year);
-    if (strcmp(timeStr, "00:00") != 0) {
+    if (strcmp(timeStr, "00:00") != 0)
+    {
         sscanf(timeStr, "%d:%d", &hour, &minute);
     }
 
@@ -622,17 +680,21 @@ int edu_isFutureDateTime(char *dateStr, char *timeStr) {
 }
 
 // Function to get integer input within a range with validation
-int edu_getIntInput(char *prompt, int min, int max) {
+int edu_getIntInput(char *prompt, int min, int max)
+{
     int value;
     char inputStr[20];
-    while (1) {
+    while (1)
+    {
         printf("%s", prompt);
         fgets(inputStr, sizeof(inputStr), stdin);
-        if (sscanf(inputStr, "%d", &value) != 1) {
+        if (sscanf(inputStr, "%d", &value) != 1)
+        {
             printf("Invalid input. Please enter a number.\n");
             continue;
         }
-        if (value < min || value > max) {
+        if (value < min || value > max)
+        {
             printf("Please enter a number between %d and %d.\n", min, max);
             continue;
         }
@@ -640,7 +702,9 @@ int edu_getIntInput(char *prompt, int min, int max) {
     }
 }
 
-void edu_clearInputBuffer() {
+void edu_clearInputBuffer()
+{
     int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
 }
