@@ -62,7 +62,7 @@
   <li>admin.c – Handles the admin login and displays relevant options like viewing customer details and event details.</li>
   <li>health.c – Manages health-related event categories and bookings.</li>
   <li>prof.c – Manages professional event categories and bookings.</li>
-  <li>com.c – Manages communication-related event categories and bookings.</li>
+  <li>com_cul.c – Manages communication-related event categories and bookings.</li>
   <li>edu.c – Manages educational event categories and bookings.</li>
   <li>user.c – Manages user login, registration, and displays event categories.</li>
   <li>contractor.c – Manages contractor login, task assignment, and progress tracking.</li>
