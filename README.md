@@ -1,9 +1,7 @@
 <h2 align="left">Hi 👋! We are Array Avengers.</h2>
 
-###
-
-![Alt text]("https://drive.google.com/file/d/1XnVKmWfBmM08JvnmIdaOeoiL_aY8ygoh/view?usp=sharing")
-
+<!-- Add image to the top right -->
+<img src="https://drive.google.com/uc?export=view&id=1XnVKmWfBmM08JvnmIdaOeoiL_aY8ygoh" alt="Array Avengers Logo" style="float: right; height: 150px; margin-left: 20px;"/>
 
 ###
 
@@ -55,8 +53,6 @@
   <li>user.c – Manages user login, registration, and displays event categories.</li>
   <li>contractor.c – Manages contractor login, task assignment, and progress tracking.</li>
   <li>personalCeleb.c-the file holds functions which covers the event management related to personal achivements or gatherings.</li>
-  
- 
 </ul>
 
 ###
