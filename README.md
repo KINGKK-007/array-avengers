@@ -1,7 +1,14 @@
 <h2 align="left">Hi 👋! We are Array Avengers.</h2>
 
-<!-- Add image to the top right -->
+<!-- Add image to the top right (Array Avengers Logo) -->
 <img src="https://drive.google.com/uc?export=view&id=1XnVKmWfBmM08JvnmIdaOeoiL_aY8ygoh" alt="Array Avengers Logo" style="float: right; height: 150px; margin-left: 20px;"/>
+
+###
+
+<!-- Center the new image (provided link) -->
+<div align="center">
+  <img src="https://drive.google.com/uc?export=view&id=1_fbPR8TgG0Vq2hFImX0jvKAt_N5P9c6Y" alt="New Image" style="height: 150px;"/>
+</div>
 
 ###
 
@@ -52,7 +59,7 @@
   <li>edu.c – Manages educational event categories and bookings.</li>
   <li>user.c – Manages user login, registration, and displays event categories.</li>
   <li>contractor.c – Manages contractor login, task assignment, and progress tracking.</li>
-  <li>personalCeleb.c-the file holds functions which covers the event management related to personal achivements or gatherings.</li>
+  <li>personalCeleb.c-the file holds functions which covers the event management related to personal achievements or gatherings.</li>
   <li>master_admin.c-manages the entire workload of admin.c.</li>
 </ul>
 
