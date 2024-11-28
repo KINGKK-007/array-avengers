@@ -15,10 +15,42 @@
 ###
 
 <div align="left">
-  <a href="https://www.linkedin.com/in/kanav-kumar-b655962b5/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank">
-    <img src="https://img.shields.io/static/v1?message=LinkedIn&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="linkedin logo" />
+  <!-- Contributor 1: Pulkit Pandey -->
+  <a href="https://www.linkedin.com/in/pulkit-pandey" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Pulkit%20Pandey&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Pulkit's LinkedIn" />
+  </a>
+  &nbsp;&nbsp;
+
+  <!-- Contributor 2: Aryan Malik -->
+  <a href="https://www.linkedin.com/in/aryan-malik" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Aryan%20Malik&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Aryan's LinkedIn" />
+  </a>
+  &nbsp;&nbsp;
+
+  <!-- Contributor 3: Kanav Kumar -->
+  <a href="https://www.linkedin.com/in/kanav-kumar" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Kanav%20Kumar&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Kanav's LinkedIn" />
+  </a>
+  &nbsp;&nbsp;
+
+  <!-- Contributor 4: Dayal Gupta -->
+  <a href="https://www.linkedin.com/in/dayal-gupta" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Dayal%20Gupta&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Dayal's LinkedIn" />
+  </a>
+  &nbsp;&nbsp;
+
+  <!-- Contributor 5: Ayush Patel -->
+  <a href="https://www.linkedin.com/in/ayush-patel" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Ayush%20Patel&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Ayush's LinkedIn" />
+  </a>
+  &nbsp;&nbsp;
+
+  <!-- Contributor 6: Kabir Ahuja -->
+  <a href="https://www.linkedin.com/in/kabir-ahuja" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Kabir%20Ahuja&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Kabir's LinkedIn" />
   </a>
 </div>
+
 
 
 ###
