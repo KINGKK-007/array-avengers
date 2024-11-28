@@ -344,12 +344,12 @@ void user_first_page()
         user_displayWelcomeBanner(width);
 
         // Menu options
-        user_displayCenteredText(" Personal Development\n", width, GREEN);
-        user_displayCenteredText("\xF0\x9F\x86\x90 Community and Cultural Events\n", width, YELLOW);
-        user_displayCenteredText("\xF0\x9F\x85\x91 Educational and Academic Events\n", width, CYAN);
-        user_displayCenteredText("\xF0\x9F\x85\x92 Professional Development\n", width, BLUE);
-        user_displayCenteredText("\xF0\x9F\x85\x93 Health and Wellness Events\n", width, MAGENTA);
-        user_displayCenteredText("\xF0\x9F\x85\x94 Corporate Events\n", width, RED);
+        user_displayCenteredText(" Personal Development\n", width, GREEN); // all done.
+        user_displayCenteredText("\xF0\x9F\x86\x90 Community and Cultural Events\n", width, YELLOW); // done only ui 
+        user_displayCenteredText("\xF0\x9F\x85\x91 Educational and Academic Events\n", width, CYAN); // done mine
+        user_displayCenteredText("\xF0\x9F\x85\x92 Professional Development\n", width, BLUE); // done mine
+        user_displayCenteredText("\xF0\x9F\x85\x93 Health and Wellness Events\n", width, MAGENTA); // done mine
+        user_displayCenteredText("\xF0\x9F\x85\x94 Corporate Events\n", width, RED); // done mine
         user_displayCenteredText("\xF0\x9F\x85\x95 Others\n", width, GREEN);
 
         // Prompt for user input
@@ -361,13 +361,11 @@ void user_first_page()
         case 1:
             personal_main();
             printf("\n");
-            user_displayCenteredText("[Feature Coming Soon: Personal Development]", width, CYAN);
             sleep(2); // Wait for 2 seconds
             break;
         case 2:
-            com_main();
+            // com_main();
             printf("\n");
-            user_displayCenteredText("[Feature Coming Soon: Community and Cultural Events]", width, CYAN);
             sleep(2); // Wait for 2 seconds
             break;
         case 3:
