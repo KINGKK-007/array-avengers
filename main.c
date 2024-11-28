@@ -54,11 +54,18 @@ void displayWelcomeBanner(int width)
     printf("\n\n");
 }
 
+// Function to play background music
+void playBackgroundMusic(const char *file) {
+    char command[256];
+    snprintf(command, sizeof(command), "afplay %s &", file);
+    system(command);
+}
 // Main menu function
 void MainMenu()
 {
     while (1)
     {
+        playBackgroundMusic("background_music.mp3");
         int choice;
 
         // Get terminal width
@@ -98,7 +105,8 @@ void MainMenu()
             break;
         case 4:
             printf("\n");
-            displayCenteredText("Thank you for using Event Manager System. Goodbye!", width, MAGENTA);
+            displayCenteredText("Exiting the system!", width, MAGENTA);
+            system("pkill afplay");
             exit(0);
         default:
             printf("\n");

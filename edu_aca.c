@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include "global_user.h"
 
 #define MAX_BOOKINGS 100
 #define RESET "\033[0m"
@@ -44,6 +45,7 @@ typedef struct
     float totalAmount;
     char description[255];
     char status[20];
+    int mobileNumber;
 } edu_Booking;
 
 typedef struct edu_BookingNode
@@ -65,40 +67,6 @@ typedef struct
     float feePerPerson;
 } Event;
 
-void edu_saveBookingsToCSV()
-{
-    FILE *file = fopen("Bookings.csv", "a");
-    if (!file)
-    {
-        printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
-        return;
-    }
-
-    // Write header row
-    fprintf(file, "Event Name,Description,Date,Time,Venue,Number of People,Fee Per Person,Total Before GST,GST Amount,Total Amount,Status\n");
-
-    // Write each booking
-    for (int i = 0; i < edu_bookingCount; i++)
-    {
-        fprintf(file, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%.2f,%.2f,%.2f,%.2f,\"%s\"\n",
-                bookings[i].eventName,
-                bookings[i].description,
-                bookings[i].date,
-                bookings[i].time,
-                bookings[i].venue,
-                bookings[i].numberOfPeople,
-                bookings[i].feePerPerson,
-                bookings[i].totalBeforeGST,
-                bookings[i].gstAmount,
-                bookings[i].totalAmount,
-                bookings[i].status);
-    }
-
-    fclose(file);
-    printf("\033[1;32mBookings saved successfully to %s\033[0m\n", "Bookings.csv");
-}
-
-// Function to load bookings from a CSV file
 void edu_loadBookingsFromCSV()
 {
     FILE *file = fopen("Bookings.csv", "r");
@@ -111,60 +79,91 @@ void edu_loadBookingsFromCSV()
     char line[1024];
     int lineCount = 0;
 
-    // Skip the CSV header
+    // Skip the header row
     fgets(line, sizeof(line), file);
 
     while (fgets(line, sizeof(line), file))
     {
-        lineCount++;
         edu_Booking newBooking;
         char *token;
 
-        // Parse each column
-        token = strtok(line, "\",");
+        // Parse each field from the CSV
+        token = strtok(line, ",");
         strncpy(newBooking.eventName, token, sizeof(newBooking.eventName) - 1);
 
-        token = strtok(NULL, "\",");
-        strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
-
-        token = strtok(NULL, "\",");
-        strncpy(newBooking.venue, token, sizeof(newBooking.venue) - 1);
-
-        token = strtok(NULL, "\",");
-        strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
-
-        token = strtok(NULL, "\",");
-        newBooking.numberOfPeople = atoi(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.feePerPerson = atof(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.totalBeforeGST = atof(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.gstAmount = atof(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.totalAmount = atof(token);
-
-        token = strtok(NULL, "\",");
+        token = strtok(NULL, ",");
         strncpy(newBooking.description, token, sizeof(newBooking.description) - 1);
 
-        token = strtok(NULL, "\",");
+        token = strtok(NULL, ",");
+        strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
+
+        token = strtok(NULL, ",");
+        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+
+        token = strtok(NULL, ",");
+        strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(newBooking.venue, token, sizeof(newBooking.venue) - 1);
+
+        token = strtok(NULL, ",");
+        newBooking.numberOfPeople = atoi(token);
+
+        token = strtok(NULL, ",");
+        newBooking.feePerPerson = atof(token);
+
+        token = strtok(NULL, ",");
+        newBooking.totalBeforeGST = atof(token);
+
+        token = strtok(NULL, ",");
+        newBooking.gstAmount = atof(token);
+
+        token = strtok(NULL, ",");
+        newBooking.totalAmount = atof(token);
+
+        token = strtok(NULL, ",");
         strncpy(newBooking.status, token, sizeof(newBooking.status) - 1);
 
-        // Add the booking to the linked list
-        edu_BookingNode *newNode = (edu_BookingNode *)malloc(sizeof(edu_BookingNode));
-        newNode->data = newBooking;
-        newNode->next = edu_bookingList;
-        edu_bookingList = newNode;
+        // Add the booking to the bookings array
+        bookings[edu_bookingCount++] = newBooking;
     }
 
     fclose(file);
-    printf("\033[1;32m%d bookings loaded from Bookings.csv.\033[0m\n", lineCount);
+    printf("\033[1;32m%d bookings loaded from Bookings.csv.\033[0m\n", edu_bookingCount);
 }
+void edu_saveBookingsToCSV()
+{
+    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
+    if (!file)
+    {
+        printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
+        return;
+    }
 
+    // Write the header row
+    fprintf(file, "Event Name,Description,Date,Mobile Number,Time,Venue,Number of People,Fee Per Person,Total Before GST,GST Amount,Total Amount,Status\n");
+
+    // Write all bookings to the file
+    for (int i = 0; i < edu_bookingCount; i++)
+    {
+        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
+                bookings[i].eventName,
+                bookings[i].description,
+                bookings[i].date,
+                bookings[i].mobileNumber,
+                bookings[i].time,
+                bookings[i].venue,
+                bookings[i].numberOfPeople,
+                bookings[i].feePerPerson,
+                bookings[i].totalBeforeGST,
+                bookings[i].gstAmount,
+                bookings[i].totalAmount,
+                bookings[i].status);
+    }
+
+    fclose(file);
+    printf("\033[1;32mBookings saved successfully to Bookings.csv\033[0m\n");
+}
 // Array of Events
 Event edu_events[] = {
     {"Seminars", "Attend enlightening seminars on various topics.", 800.0},
@@ -476,80 +475,112 @@ void edu_viewBookings()
 {
     system("clear");
 
-    int terminalWidth = edu_getTerminalWidth(); // Dynamically get terminal width
-    int columnWidth = terminalWidth / 8;        // Divide into columns (adjust as needed)
+    int terminalWidth = edu_getTerminalWidth(); // Get terminal width
+    int columnWidth = terminalWidth / 8;          // Divide terminal width for columns
 
-    // Manually print a line of dashes based on terminal width
+    // Print header
     for (int i = 0; i < terminalWidth; i++)
-    {
         printf("=");
-    }
+    printf("\n");
+    edu_displayCenteredText("🎟️ Your Bookings 🎟️", terminalWidth, MAGENTA BOLD);
+    for (int i = 0; i < terminalWidth; i++)
+        printf("=");
     printf("\n");
 
-    // Display centered title with color and emoji
-    edu_displayCenteredText("🎟️ All Bookings 🎟️", terminalWidth, MAGENTA BOLD); // 🎟️ All Bookings
-
-    // Manually print a line of dashes based on terminal width
-    for (int i = 0; i < terminalWidth; i++)
+    FILE *file = fopen("Bookings.csv", "r");
+    if (file == NULL)
     {
-        printf("=");
+        edu_displayCenteredText("❌ No bookings file found. ❌", terminalWidth, RED);
+        printf("\n");
+        return;
     }
+
+    char line[1024];
+    int lineCount = 0;
+    int foundBooking = 0; // Flag to indicate if we found any matching booking
+
+    // Skip the CSV header
+    fgets(line, sizeof(line), file);
+
+    // Print table header
+    printf("%-*s %-*s %-*s %-*s %-*s %-*s %-*s %-*s\n",
+           columnWidth, "ID", columnWidth, "Event", columnWidth, "Date",
+           columnWidth, "Venue", columnWidth, "Time", columnWidth,
+           "No. of People", columnWidth, "Amount Paid", columnWidth, "Status");
+
+    for (int i = 0; i < terminalWidth; i++)
+        printf("=");
     printf("\n");
 
-    if (edu_bookingCount == 0)
+    // Read each line from the file
+    while (fgets(line, sizeof(line), file))
     {
-        // If no bookings found, show error message in red
-        edu_displayCenteredText("❌ No bookings found. ❌", terminalWidth, RED);
+        edu_Booking booking;
+        char *token;
+
+        // Parse each field
+        token = strtok(line, ",");
+        strncpy(booking.eventName, token, sizeof(booking.eventName) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.description, token, sizeof(booking.description) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.date, token, sizeof(booking.date) - 1);
+
+        token = strtok(NULL, ",");
+        booking.mobileNumber = atoi(token);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.time, token, sizeof(booking.time) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.venue, token, sizeof(booking.venue) - 1);
+
+        token = strtok(NULL, ",");
+        booking.numberOfPeople = atoi(token);
+
+        token = strtok(NULL, ",");
+        booking.feePerPerson = atof(token);
+
+        token = strtok(NULL, ",");
+        booking.totalBeforeGST = atof(token);
+
+        token = strtok(NULL, ",");
+        booking.gstAmount = atof(token);
+
+        token = strtok(NULL, ",");
+        booking.totalAmount = atof(token);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.status, token, sizeof(booking.status) - 1);
+
+        // Check if this booking belongs to the current user
+        if (booking.mobileNumber == mobile_number)
+        {
+            foundBooking = 1;
+            lineCount++;
+            printf("%-*d %-*s %-*s %-*s %-*s %-*d ₹%-*.2f %-*s\n",
+                   columnWidth, lineCount, columnWidth, booking.eventName,
+                   columnWidth, booking.date, columnWidth, booking.venue,
+                   columnWidth, booking.time, columnWidth, booking.numberOfPeople,
+                   columnWidth, booking.totalAmount, columnWidth, booking.status);
+        }
     }
-    else
+
+    fclose(file);
+
+    if (!foundBooking)
     {
-        // Table header with dynamic column widths and emojis for each column
-        printf("\n");
-        edu_displayCenteredText("📑 Event Details 📑", terminalWidth, YELLOW);
-        printf("\n");
-
-        // Manually print a line of dashes based on terminal width
-        for (int i = 0; i < terminalWidth; i++)
-        {
-            printf("=");
-        }
-        printf("\n");
-
-        // Print the table header
-        printf("%-*s %-*s %-*s %-*s %-*s %-*s %-*s %-*s\n",
-               columnWidth, "ID", columnWidth, "Event", columnWidth, "Date",
-               columnWidth, "Venue", columnWidth, "Time", columnWidth,
-               "No. of People", columnWidth, "Amount Paid", columnWidth, "Status");
-
-        // Manually print a line of dashes based on terminal width
-        for (int i = 0; i < terminalWidth; i++)
-        {
-            printf("=");
-        }
-        printf("\n");
-
-        // Loop through and display all bookings in a neat table format
-        for (int i = 0; i < edu_bookingCount; i++)
-        {
-            // Display booking details for each entry
-            printf("%-*d %-*s %-*s %-*s %-*s %-*d ₹%-*0.2f %-*s\n",
-                   columnWidth, i + 1, columnWidth, bookings[i].eventName,
-                   columnWidth, bookings[i].date, columnWidth, bookings[i].venue,
-                   columnWidth, bookings[i].time, columnWidth, bookings[i].numberOfPeople,
-                   columnWidth, bookings[i].totalAmount, columnWidth, bookings[i].status);
-        }
+        edu_displayCenteredText("❌ No bookings found for your mobile number. ❌", terminalWidth, RED);
     }
 
-    // Manually print a line of dashes based on terminal width
     for (int i = 0; i < terminalWidth; i++)
-    {
         printf("=");
-    }
     printf("\n");
 
-    // Prompt user to return to the menu
     edu_displayCenteredText("🔙 Press Enter to return to menu... 🔙", terminalWidth, GREEN);
-    getchar(); // Wait for user input to return to the menu
+    getchar(); // Wait for user input to return to menu
 }
 
 void edu_displayQRCode()

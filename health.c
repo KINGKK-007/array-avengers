@@ -79,87 +79,78 @@ void health_loadBookingsFromCSV()
     char line[1024];
     int lineCount = 0;
 
-    // Skip the CSV header
+    // Skip the header row
     fgets(line, sizeof(line), file);
 
     while (fgets(line, sizeof(line), file))
     {
-        lineCount++;
         health_Booking newBooking;
         char *token;
 
-        // Parse each column
-        token = strtok(line, "\",");
+        // Parse each field from the CSV
+        token = strtok(line, ",");
         strncpy(newBooking.eventName, token, sizeof(newBooking.eventName) - 1);
 
-        token = strtok(NULL, "\",");
-        strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
-
-        token = strtok(NULL, "\",");
-        // Convert the mobile number string to integer
-        newBooking.mobileNumber = atoi(token);  // Convert to integer
-
-        token = strtok(NULL, "\",");
-        strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
-
-        token = strtok(NULL, "\",");
-        strncpy(newBooking.venue, token, sizeof(newBooking.venue) - 1);
-
-        token = strtok(NULL, "\",");
-        newBooking.numberOfPeople = atoi(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.feePerPerson = atof(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.totalBeforeGST = atof(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.gstAmount = atof(token);
-
-        token = strtok(NULL, "\",");
-        newBooking.totalAmount = atof(token);
-
-        token = strtok(NULL, "\",");
+        token = strtok(NULL, ",");
         strncpy(newBooking.description, token, sizeof(newBooking.description) - 1);
 
-        token = strtok(NULL, "\",");
+        token = strtok(NULL, ",");
+        strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
+
+        token = strtok(NULL, ",");
+        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+
+        token = strtok(NULL, ",");
+        strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(newBooking.venue, token, sizeof(newBooking.venue) - 1);
+
+        token = strtok(NULL, ",");
+        newBooking.numberOfPeople = atoi(token);
+
+        token = strtok(NULL, ",");
+        newBooking.feePerPerson = atof(token);
+
+        token = strtok(NULL, ",");
+        newBooking.totalBeforeGST = atof(token);
+
+        token = strtok(NULL, ",");
+        newBooking.gstAmount = atof(token);
+
+        token = strtok(NULL, ",");
+        newBooking.totalAmount = atof(token);
+
+        token = strtok(NULL, ",");
         strncpy(newBooking.status, token, sizeof(newBooking.status) - 1);
 
-        // Add the booking to the linked list or array
-        health_BookingNode *newNode = (health_BookingNode *)malloc(sizeof(health_BookingNode));
-        newNode->data = newBooking;
-        newNode->next = health_bookingList;
-        health_bookingList = newNode;
+        // Add the booking to the bookings array
+        bookings[health_bookingCount++] = newBooking;
     }
 
     fclose(file);
-    printf("\033[1;32m%d bookings loaded from Bookings.csv.\033[0m\n", lineCount);
+    printf("\033[1;32m%d bookings loaded from Bookings.csv.\033[0m\n", health_bookingCount);
 }
 void health_saveBookingsToCSV()
 {
-    FILE *file = fopen("Bookings.csv", "a");
+    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
     if (!file)
     {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
         return;
     }
 
-    // Write header row if the file is empty
+    // Write the header row
     fprintf(file, "Event Name,Description,Date,Mobile Number,Time,Venue,Number of People,Fee Per Person,Total Before GST,GST Amount,Total Amount,Status\n");
 
-    // Write each booking
+    // Write all bookings to the file
     for (int i = 0; i < health_bookingCount; i++)
     {
-        // Convert mobile number from integer to string before writing to file
-        char mobileNumberStr[15];  // Buffer to hold the string representation of the mobile number
-        snprintf(mobileNumberStr, sizeof(mobileNumberStr), "%d", bookings[i].mobileNumber);
-
-        fprintf(file, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%.2f,%.2f,%.2f,%.2f,\"%s\"\n",
+        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
                 bookings[i].eventName,
                 bookings[i].description,
                 bookings[i].date,
-                mobileNumberStr,  // Save the mobile number as a string
+                bookings[i].mobileNumber,
                 bookings[i].time,
                 bookings[i].venue,
                 bookings[i].numberOfPeople,
@@ -216,14 +207,14 @@ void health_main()
 
         // Display the header
         health_displayBanner(width);
-        health_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO healthCATIONAL EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        health_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO HEALTH EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         health_displayBanner(width);
 
         // Menu options
         printf("\n");
         health_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
         health_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
-        health_displayCenteredText("3️⃣. Exit", width, RED);                  // 3️⃣
+        health_displayCenteredText("3️⃣. Exit", width, RED);                   // 3️⃣
         printf("\n");
 
         // Footer line
@@ -255,7 +246,8 @@ void health_main()
         case 3:
             system("clear");
             health_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
-            sleep(2);                                                                                                     // Pause for 2 seconds before exiting
+            sleep(2); 
+            system("pkill afplay");                                          // Pause for 2 seconds before exiting
             exit(0);
 
         default:
@@ -322,7 +314,8 @@ void health_bookEvent()
     char choiceStr[10];
     int eventChoice;
     health_Booking newBooking;
-    strncpy(newBooking.mobileNumber, mobile_number, sizeof(newBooking.mobileNumber) - 1);
+    newBooking.mobileNumber = mobile_number; // Direct assignment for integers
+
     char confirmStr[10];
     char confirm;
 
@@ -485,94 +478,112 @@ void health_viewBookings()
 {
     system("clear");
 
-    int terminalWidth = health_getTerminalWidth(); // Dynamically get terminal width
-    int columnWidth = terminalWidth / 8;           // Divide into columns (adjust as needed)
+    int terminalWidth = health_getTerminalWidth(); // Get terminal width
+    int columnWidth = terminalWidth / 8;          // Divide terminal width for columns
 
-    // Manually print a line of dashes based on terminal width
+    // Print header
     for (int i = 0; i < terminalWidth; i++)
-    {
         printf("=");
-    }
     printf("\n");
-
-    // Display centered title with color and emoji
     health_displayCenteredText("🎟️ Your Bookings 🎟️", terminalWidth, MAGENTA BOLD);
-
-    // Manually print a line of dashes based on terminal width
     for (int i = 0; i < terminalWidth; i++)
-    {
         printf("=");
-    }
     printf("\n");
 
-    if (health_bookingCount == 0)
+    FILE *file = fopen("Bookings.csv", "r");
+    if (file == NULL)
     {
-        // If no bookings found, show error message in red
-        health_displayCenteredText("❌ No bookings found. ❌", terminalWidth, RED);
-    }
-    else
-    {
-        // Table header with dynamic column widths and emojis for each column
+        health_displayCenteredText("❌ No bookings file found. ❌", terminalWidth, RED);
         printf("\n");
-        health_displayCenteredText("📑 Event Details 📑", terminalWidth, YELLOW);
-        printf("\n");
-
-        // Manually print a line of dashes based on terminal width
-        for (int i = 0; i < terminalWidth; i++)
-        {
-            printf("=");
-        }
-        printf("\n");
-
-        // Print the table header
-        printf("%-*s %-*s %-*s %-*s %-*s %-*s %-*s %-*s\n",
-               columnWidth, "ID", columnWidth, "Event", columnWidth, "Date",
-               columnWidth, "Venue", columnWidth, "Time", columnWidth,
-               "No. of People", columnWidth, "Amount Paid", columnWidth, "Status");
-
-        // Manually print a line of dashes based on terminal width
-        for (int i = 0; i < terminalWidth; i++)
-        {
-            printf("=");
-        }
-        printf("\n");
-
-        int foundBooking = 0; // Flag to check if any booking was found
-
-        // Loop through and display only the bookings made by the user (filter by mobile number)
-        for (int i = 0; i < health_bookingCount; i++)
-        {
-            int bookingMobileNumber = atoi(bookings[i].mobileNumber);  // Convert string to integer
-
-            // Compare with the logged-in user's mobile number
-            if (mobile_number == bookingMobileNumber)  
-            {
-                foundBooking = 1;  // We found at least one booking for this user
-                // Display booking details for each entry that matches the user's mobile number
-                printf("%-*d %-*s %-*s %-*s %-*s %-*d ₹%-*0.2f %-*s\n",
-                       columnWidth, i + 1, columnWidth, bookings[i].eventName,
-                       columnWidth, bookings[i].date, columnWidth, bookings[i].venue,
-                       columnWidth, bookings[i].time, columnWidth, bookings[i].numberOfPeople,
-                       columnWidth, bookings[i].totalAmount, columnWidth, bookings[i].status);
-            }
-        }
-
-        if (!foundBooking)  // If no bookings were found for this user
-        {
-            health_displayCenteredText("❌ No bookings found for your mobile number. ❌", terminalWidth, RED);
-        }
+        return;
     }
 
-    // Manually print a line of dashes based on terminal width
+    char line[1024];
+    int lineCount = 0;
+    int foundBooking = 0; // Flag to indicate if we found any matching booking
+
+    // Skip the CSV header
+    fgets(line, sizeof(line), file);
+
+    // Print table header
+    printf("%-*s %-*s %-*s %-*s %-*s %-*s %-*s %-*s\n",
+           columnWidth, "ID", columnWidth, "Event", columnWidth, "Date",
+           columnWidth, "Venue", columnWidth, "Time", columnWidth,
+           "No. of People", columnWidth, "Amount Paid", columnWidth, "Status");
+
     for (int i = 0; i < terminalWidth; i++)
-    {
         printf("=");
-    }
     printf("\n");
 
-    // Prompt user to return to the menu
+    // Read each line from the file
+    while (fgets(line, sizeof(line), file))
+    {
+        health_Booking booking;
+        char *token;
+
+        // Parse each field
+        token = strtok(line, ",");
+        strncpy(booking.eventName, token, sizeof(booking.eventName) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.description, token, sizeof(booking.description) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.date, token, sizeof(booking.date) - 1);
+
+        token = strtok(NULL, ",");
+        booking.mobileNumber = atoi(token);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.time, token, sizeof(booking.time) - 1);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.venue, token, sizeof(booking.venue) - 1);
+
+        token = strtok(NULL, ",");
+        booking.numberOfPeople = atoi(token);
+
+        token = strtok(NULL, ",");
+        booking.feePerPerson = atof(token);
+
+        token = strtok(NULL, ",");
+        booking.totalBeforeGST = atof(token);
+
+        token = strtok(NULL, ",");
+        booking.gstAmount = atof(token);
+
+        token = strtok(NULL, ",");
+        booking.totalAmount = atof(token);
+
+        token = strtok(NULL, ",");
+        strncpy(booking.status, token, sizeof(booking.status) - 1);
+
+        // Check if this booking belongs to the current user
+        if (booking.mobileNumber == mobile_number)
+        {
+            foundBooking = 1;
+            lineCount++;
+            printf("%-*d %-*s %-*s %-*s %-*s %-*d ₹%-*.2f %-*s\n",
+                   columnWidth, lineCount, columnWidth, booking.eventName,
+                   columnWidth, booking.date, columnWidth, booking.venue,
+                   columnWidth, booking.time, columnWidth, booking.numberOfPeople,
+                   columnWidth, booking.totalAmount, columnWidth, booking.status);
+        }
+    }
+
+    fclose(file);
+
+    if (!foundBooking)
+    {
+        health_displayCenteredText("❌ No bookings found for your mobile number. ❌", terminalWidth, RED);
+    }
+
+    for (int i = 0; i < terminalWidth; i++)
+        printf("=");
+    printf("\n");
+
     health_displayCenteredText("🔙 Press Enter to return to menu... 🔙", terminalWidth, GREEN);
-    getchar(); // Wait for user input to return to the menu
+    getchar(); // Wait for user input to return to menu
 }
 
 void health_displayQRCode()
@@ -622,6 +633,7 @@ void health_displayQRCode()
 void health_exitProgram()
 {
     printf("\nExiting...\n");
+    system("pkill afplay");
     exit(0);
 }
 

@@ -152,6 +152,7 @@ void user_up()
             }
             else if (choice == 3)
             {
+                system("pkill afplay");
                 exit(0);
             }
             else
@@ -312,6 +313,7 @@ void userLogin()
             user_up();
             break;
         case 3:
+            system("pkill afplay");
             exit(0);
         default:
             printf("\n");
