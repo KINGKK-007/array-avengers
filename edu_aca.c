@@ -45,7 +45,7 @@ typedef struct
     float totalAmount;
     char description[255];
     char status[20];
-    int mobileNumber;
+    char mobileNumber[15];
 } edu_Booking;
 
 typedef struct edu_BookingNode
@@ -98,7 +98,7 @@ void edu_loadBookingsFromCSV()
         strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
 
         token = strtok(NULL, ",");
-        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+        strncpy(newBooking.mobileNumber, token, sizeof(newBooking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
@@ -133,7 +133,7 @@ void edu_loadBookingsFromCSV()
 }
 void edu_saveBookingsToCSV()
 {
-    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
+    FILE *file = fopen("Bookings.csv", "a");
     if (!file)
     {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
@@ -146,11 +146,11 @@ void edu_saveBookingsToCSV()
     // Write all bookings to the file
     for (int i = 0; i < edu_bookingCount; i++)
     {
-        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
+        fprintf(file, "%s,%s,%s,%s,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n", 
                 bookings[i].eventName,
                 bookings[i].description,
                 bookings[i].date,
-                bookings[i].mobileNumber,
+                bookings[i].mobileNumber,  // Now stored as string
                 bookings[i].time,
                 bookings[i].venue,
                 bookings[i].numberOfPeople,
@@ -207,14 +207,14 @@ void edu_main()
 
         // Display the header
         edu_displayBanner(width);
-        edu_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO EDUCATIONAL EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        edu_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO edu EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         edu_displayBanner(width);
 
         // Menu options
         printf("\n");
         edu_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
         edu_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
-        edu_displayCenteredText("3️⃣.  Exit", width, RED);                  // 3️⃣
+        edu_displayCenteredText("3️⃣. Exit", width, RED);                   // 3️⃣
         printf("\n");
 
         // Footer line
@@ -244,15 +244,16 @@ void edu_main()
             break;
 
         case 3:
-            system("clear");                                                                                  
+            system("clear");
             edu_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
-            sleep(2);                                                                                                  // Pause for 2 seconds before exiting
+            sleep(2); 
+            system("pkill afplay");                                          // Pause for 2 seconds before exiting
             exit(0);
 
         default:
             system("clear");
             edu_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
-            sleep(2);                                                                                                   // Pause for 2 seconds before returning to menu
+            sleep(2);                                                                                                      // Pause for 2 seconds before returning to menu
         }
     }
 }
@@ -266,7 +267,7 @@ void edu_cat_display()
 
     // Display header
     printf("\n");
-    edu_displayCenteredText("\xF0\x9F\x8E\x93 Event Categories", width, MAGENTA BOLD); // 🎓
+    edu_displayCenteredText("\xF0\x9F\xA9\xBA Event Categories", width, MAGENTA BOLD); // 🩺
     printf("\n");
     for (int i = 0; i < width; i++) // Print top border
         printf("%s=%s", CYAN, RESET);
@@ -313,6 +314,7 @@ void edu_bookEvent()
     char choiceStr[10];
     int eventChoice;
     edu_Booking newBooking;
+    strncpy(newBooking.mobileNumber, mobile_number, sizeof(newBooking.mobileNumber) - 1);
     char confirmStr[10];
     char confirm;
 
@@ -529,7 +531,7 @@ void edu_viewBookings()
         strncpy(booking.date, token, sizeof(booking.date) - 1);
 
         token = strtok(NULL, ",");
-        booking.mobileNumber = atoi(token);
+        strncpy(booking.mobileNumber, token, sizeof(booking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(booking.time, token, sizeof(booking.time) - 1);
@@ -556,7 +558,7 @@ void edu_viewBookings()
         strncpy(booking.status, token, sizeof(booking.status) - 1);
 
         // Check if this booking belongs to the current user
-        if (booking.mobileNumber == mobile_number)
+        if (strcmp(booking.mobileNumber, mobile_number) == 0) // Compare as strings
         {
             foundBooking = 1;
             lineCount++;
@@ -630,6 +632,7 @@ void edu_displayQRCode()
 void edu_exitProgram()
 {
     printf("\nExiting...\n");
+    system("pkill afplay");
     exit(0);
 }
 

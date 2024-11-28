@@ -1,3 +1,3 @@
 #include "global_user.h"
 
-int mobile_number;
+char mobile_number[15];

@@ -45,7 +45,7 @@ typedef struct
     float totalAmount;
     char description[255];
     char status[20];
-    int mobileNumber;
+    char mobileNumber[15];
 } health_Booking;
 
 typedef struct health_BookingNode
@@ -98,7 +98,7 @@ void health_loadBookingsFromCSV()
         strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
 
         token = strtok(NULL, ",");
-        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+        strncpy(newBooking.mobileNumber, token, sizeof(newBooking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
@@ -133,7 +133,7 @@ void health_loadBookingsFromCSV()
 }
 void health_saveBookingsToCSV()
 {
-    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
+    FILE *file = fopen("Bookings.csv", "a");
     if (!file)
     {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
@@ -146,11 +146,11 @@ void health_saveBookingsToCSV()
     // Write all bookings to the file
     for (int i = 0; i < health_bookingCount; i++)
     {
-        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
+        fprintf(file, "%s,%s,%s,%s,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n", 
                 bookings[i].eventName,
                 bookings[i].description,
                 bookings[i].date,
-                bookings[i].mobileNumber,
+                bookings[i].mobileNumber,  // Now stored as string
                 bookings[i].time,
                 bookings[i].venue,
                 bookings[i].numberOfPeople,
@@ -314,8 +314,7 @@ void health_bookEvent()
     char choiceStr[10];
     int eventChoice;
     health_Booking newBooking;
-    newBooking.mobileNumber = mobile_number; // Direct assignment for integers
-
+    strncpy(newBooking.mobileNumber, mobile_number, sizeof(newBooking.mobileNumber) - 1);
     char confirmStr[10];
     char confirm;
 
@@ -532,7 +531,7 @@ void health_viewBookings()
         strncpy(booking.date, token, sizeof(booking.date) - 1);
 
         token = strtok(NULL, ",");
-        booking.mobileNumber = atoi(token);
+        strncpy(booking.mobileNumber, token, sizeof(booking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(booking.time, token, sizeof(booking.time) - 1);
@@ -559,7 +558,7 @@ void health_viewBookings()
         strncpy(booking.status, token, sizeof(booking.status) - 1);
 
         // Check if this booking belongs to the current user
-        if (booking.mobileNumber == mobile_number)
+        if (strcmp(booking.mobileNumber, mobile_number) == 0) // Compare as strings
         {
             foundBooking = 1;
             lineCount++;

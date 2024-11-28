@@ -29,8 +29,9 @@ int com_isValidTime(char *timeStr);
 int com_isFutureDateTime(char *dateStr, char *timeStr);
 int com_getIntInput(char *prompt, int min, int max);
 void com_clearInputBuffer();
+int com_getTerminalWidth();
 
-// com_Booking structure
+// Booking structure
 typedef struct
 {
     char eventName[50];
@@ -44,7 +45,7 @@ typedef struct
     float totalAmount;
     char description[255];
     char status[20];
-    int mobileNumber;
+    char mobileNumber[15];
 } com_Booking;
 
 typedef struct com_BookingNode
@@ -66,38 +67,6 @@ typedef struct
     float feePerPerson;
 } Event;
 
-int com_getTerminalWidth()
-{
-    FILE *fp = popen("tput cols", "r");
-    if (!fp)
-        return 80; // Default width if the command fails
-    int width;
-    fscanf(fp, "%d", &width);
-    pclose(fp);
-    return width;
-}
-
-void com_printLine()
-{
-    printf("\033[1;36m%s\033[0m\n", "=======================================================");
-}
-
-void com_displayBanner(int width)
-{
-    for (int i = 0; i < width; i++)
-        printf("\033[1;36m=\033[0m");
-    printf("\n");
-}
-
-void com_displayCenteredText(const char *text, int width, const char *color)
-{
-    int padding = (width - (int)strlen(text)) / 2;
-    for (int i = 0; i < padding; i++)
-        printf(" ");
-    printf("%s%s%s\n", color, text, RESET);
-}
-
-// Function to save bookings to a CSV file
 void com_loadBookingsFromCSV()
 {
     FILE *file = fopen("Bookings.csv", "r");
@@ -129,7 +98,7 @@ void com_loadBookingsFromCSV()
         strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
 
         token = strtok(NULL, ",");
-        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+        strncpy(newBooking.mobileNumber, token, sizeof(newBooking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
@@ -164,7 +133,7 @@ void com_loadBookingsFromCSV()
 }
 void com_saveBookingsToCSV()
 {
-    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
+    FILE *file = fopen("Bookings.csv", "a");
     if (!file)
     {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
@@ -177,11 +146,11 @@ void com_saveBookingsToCSV()
     // Write all bookings to the file
     for (int i = 0; i < com_bookingCount; i++)
     {
-        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
+        fprintf(file, "%s,%s,%s,%s,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n", 
                 bookings[i].eventName,
                 bookings[i].description,
                 bookings[i].date,
-                bookings[i].mobileNumber,
+                bookings[i].mobileNumber,  // Now stored as string
                 bookings[i].time,
                 bookings[i].venue,
                 bookings[i].numberOfPeople,
@@ -195,7 +164,7 @@ void com_saveBookingsToCSV()
     fclose(file);
     printf("\033[1;32mBookings saved successfully to Bookings.csv\033[0m\n");
 }
-// Array of Community and Cultural Events
+// Array of Events
 Event com_events[] = {
     {"Local Festivals", "Celebrate local traditions and festivities.", 500.0},
     {"Art Exhibitions", "Explore artworks from local artists.", 800.0},
@@ -206,11 +175,146 @@ Event com_events[] = {
     {"Charity Events", "Support causes through community com_events.", 550.0},
 };
 
+void com_printLine()
+{
+    printf("\033[1;36m%s\033[0m\n", "=======================================================");
+}
+
+void com_displayCenteredText(const char *text, int width, const char *color)
+{
+    int padding = (width - (int)strlen(text)) / 2;
+    for (int i = 0; i < padding; i++)
+        printf(" ");
+    printf("%s%s%s\n", color, text, RESET);
+}
+
+void com_displayBanner(int width)
+{
+    for (int i = 0; i < width; i++)
+        printf("\033[1;36m=\033[0m");
+    printf("\n");
+}
+
+void com_main()
+{
+    while (1)
+    {
+        int choice;
+        int width = com_getTerminalWidth(); // Get terminal width for dynamic adjustments
+
+        // Clear the screen
+        system("clear");
+
+        // Display the header
+        com_displayBanner(width);
+        com_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO com EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        com_displayBanner(width);
+
+        // Menu options
+        printf("\n");
+        com_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
+        com_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
+        com_displayCenteredText("3️⃣. Exit", width, RED);                   // 3️⃣
+        printf("\n");
+
+        // Footer line
+        com_displayBanner(width);
+
+        // Prompt for choice
+        com_displayCenteredText("💡 Please make your selection below: ", width, GREEN);
+        printf("\n%sEnter your choice: %s", BOLD, GREEN);
+        scanf("%d", &choice);
+        getchar(); // Clear newline character from input buffer
+
+        // Handle user choice
+        switch (choice)
+        {
+        case 1:
+            system("clear");
+            com_displayCenteredText("\xF0\x9F\x8E\x89 Booking an Event... \xF0\x9F\x8E\x89", width, GREEN); // 🎉
+            com_bookEvent();
+            sleep(2); // Pause for 2 seconds before showing the next menu
+            break;
+
+        case 2:
+            system("clear");
+            com_displayCenteredText("\xF0\x9F\x93\x8C Viewing All Bookings... \xF0\x9F\x93\x8C", width, BLUE); // 📌
+            com_viewBookings();
+            sleep(2); // Pause for 2 seconds before showing the next menu
+            break;
+
+        case 3:
+            system("clear");
+            com_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
+            sleep(2); 
+            system("pkill afplay");                                          // Pause for 2 seconds before exiting
+            exit(0);
+
+        default:
+            system("clear");
+            com_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
+            sleep(2);                                                                                                      // Pause for 2 seconds before returning to menu
+        }
+    }
+}
+
+void com_cat_display()
+{
+    int width = com_getTerminalWidth(); // Dynamically determine terminal width
+
+    // Clear the screen for a fresh UI
+    system("clear");
+
+    // Display header
+    printf("\n");
+    com_displayCenteredText("\xF0\x9F\xA9\xBA Event Categories", width, MAGENTA BOLD); // 🩺
+    printf("\n");
+    for (int i = 0; i < width; i++) // Print top border
+        printf("%s=%s", CYAN, RESET);
+    printf("\n");
+
+    // Display event categories
+    int numEvents = sizeof(com_events) / sizeof(com_events[0]);
+    for (int i = 0; i < numEvents; i++)
+    {
+        char eventLine[200];
+        snprintf(eventLine, sizeof(eventLine), "[%d] %s", i + 1, com_events[i].name);
+        com_displayCenteredText(eventLine, width, GREEN); // Display each event in green
+    }
+
+    // Display "Go Back" option
+    char goBackLine[200];
+    snprintf(goBackLine, sizeof(goBackLine), "[%d] Go Back", numEvents + 1);
+    com_displayCenteredText(goBackLine, width, YELLOW BOLD); // "Go Back" in yellow bold
+
+    // Print bottom separator
+    printf("\n");
+    for (int i = 0; i < width; i++) // Print bottom border
+        printf("%s=%s", CYAN, RESET);
+    printf("\n");
+
+    // Prompt for user input
+    com_displayCenteredText("Enter your choice:", width, BLUE);
+    printf("%s> %s", BOLD, RESET);
+}
+
+int com_getTerminalWidth()
+{
+    FILE *fp = popen("tput cols", "r");
+    if (!fp)
+        return 80; // Default width if the command fails
+    int width;
+    fscanf(fp, "%d", &width);
+    pclose(fp);
+    return width;
+}
+
 void com_bookEvent()
 {
     char choiceStr[10];
     int eventChoice;
     com_Booking newBooking;
+    strncpy(newBooking.mobileNumber, mobile_number, sizeof(newBooking.mobileNumber) - 1);
     char confirmStr[10];
     char confirm;
 
@@ -427,7 +531,7 @@ void com_viewBookings()
         strncpy(booking.date, token, sizeof(booking.date) - 1);
 
         token = strtok(NULL, ",");
-        booking.mobileNumber = atoi(token);
+        strncpy(booking.mobileNumber, token, sizeof(booking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(booking.time, token, sizeof(booking.time) - 1);
@@ -454,7 +558,7 @@ void com_viewBookings()
         strncpy(booking.status, token, sizeof(booking.status) - 1);
 
         // Check if this booking belongs to the current user
-        if (booking.mobileNumber == mobile_number)
+        if (strcmp(booking.mobileNumber, mobile_number) == 0) // Compare as strings
         {
             foundBooking = 1;
             lineCount++;
@@ -481,109 +585,7 @@ void com_viewBookings()
     getchar(); // Wait for user input to return to menu
 }
 
-void com_main()
-{
-    int choice;
-    int width = com_getTerminalWidth(); // Dynamically determine terminal width
-
-    while (1)
-    {
-        // Clear the screen
-        system("clear");
-
-        // Display the header
-        com_displayBanner(width);
-        com_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO COMMUNITY AND CULTURAL EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
-        com_displayBanner(width);
-
-        // Menu options with emojis
-        printf("\n");
-        com_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
-        com_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
-        com_displayCenteredText("3️⃣.  Exit", width, RED);                  // 3️⃣
-        printf("\n");
-
-        // Footer line
-        com_displayBanner(width);
-
-        // Prompt for choice
-        com_displayCenteredText("💡 Please make your selection below: ", width, GREEN);
-        printf("\n%sEnter your choice: %s", BOLD, GREEN);
-        scanf("%d", &choice);
-        getchar(); // Clear newline character from input buffer
-
-        // Handle user choice
-        switch (choice)
-        {
-        case 1:
-            system("clear");
-            com_displayCenteredText("\xF0\x9F\x8E\x89 Booking an Event... \xF0\x9F\x8E\x89", width, GREEN); // 🎉
-            com_bookEvent();
-            sleep(2);
-            break;
-
-        case 2:
-            system("clear");
-            com_displayCenteredText("\xF0\x9F\x93\x8C Viewing All Bookings... \xF0\x9F\x93\x8C", width, BLUE); // 📌
-            com_viewBookings();
-            sleep(2);
-            break;
-
-        case 3:
-            system("clear");
-            com_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
-            sleep(2);
-            exit(0);
-
-        default:
-            system("clear");
-            com_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
-            sleep(2);
-        }
-    }
-}
-
-void com_cat_display()
-{
-    int width = com_getTerminalWidth(); // Dynamically determine terminal width
-
-    // Clear the screen for a fresh UI
-    system("clear");
-
-    // Display header
-    printf("\n");
-    com_displayCenteredText("\xF0\x9F\xA4\x9D Event Categories", width, MAGENTA BOLD); // 🤝
-    printf("\n");
-    for (int i = 0; i < width; i++) // Print top border
-        printf("%s=%s", CYAN, RESET);
-    printf("\n");
-
-    // Display event categories
-    int numEvents = sizeof(com_events) / sizeof(com_events[0]);
-    for (int i = 0; i < numEvents; i++)
-    {
-        char eventLine[200];
-        snprintf(eventLine, sizeof(eventLine), "[%d] %s", i + 1, com_events[i].name);
-        com_displayCenteredText(eventLine, width, GREEN); // Display each event in green
-    }
-
-    // Display "Go Back" option
-    char goBackLine[200];
-    snprintf(goBackLine, sizeof(goBackLine), "[%d] Go Back", numEvents + 1);
-    com_displayCenteredText(goBackLine, width, YELLOW BOLD); // "Go Back" in yellow bold
-
-    // Print bottom separator
-    printf("\n");
-    for (int i = 0; i < width; i++) // Print bottom border
-        printf("%s=%s", CYAN, RESET);
-    printf("\n");
-
-    // Prompt for user input
-    com_displayCenteredText("Enter your choice:", width, BLUE);
-    printf("%s> %s", BOLD, RESET);
-}
-
-void com_isplayQRCode()
+void com_displayQRCode()
 {
     system("clear");
     com_printLine();
@@ -630,6 +632,7 @@ void com_isplayQRCode()
 void com_exitProgram()
 {
     printf("\nExiting...\n");
+    system("pkill afplay");
     exit(0);
 }
 
@@ -681,50 +684,6 @@ int com_isValidTime(char *timeStr)
     return 1;
 }
 
-void com_displayQRCode()
-{
-    system("clear");
-    com_printLine();
-    printf("\t\t\tScan QR Code to Pay\n");
-    com_printLine();
-
-    srand(time(0));
-
-    for (int j = 0; j < 30; j++)
-    {
-        for (int i = 0; i < 30; i++)
-        {
-            if ((j == 2 && i > 1 && i < 9) || (j == 8 && i > 1 && i < 9) || (j == 2 && i < 28 && i > 20) || (j == 8 && i < 28 && i > 20) ||
-                (i == 2 && j > 1 && j < 9) || (i == 8 && j > 1 && j < 9) || (i == 2 && j < 28 && j > 20) || (i == 8 && j < 28 && j > 20) ||
-                (j == 27 && i > 1 && i < 9) || (j == 21 && i > 1 && i < 9) || (i == 27 && j > 1 && j < 9) || (i == 21 && j > 1 && j < 9) ||
-                (j == 4 && i > 3 && i < 7) || (j == 6 && i > 3 && i < 7) || (j == 4 && i < 26 && i > 22) || (j == 6 && i < 26 && i > 22) ||
-                (i == 4 && j > 3 && j < 7) || (i == 6 && j > 3 && j < 7) || (i == 4 && j < 26 && j > 22) || (i == 6 && j < 26 && j > 22) ||
-                (j == 25 && i > 3 && i < 7) || (j == 23 && i > 3 && i < 7) || (i == 23 && j > 3 && j < 7) || (i == 23 && j > 3 && j < 7) ||
-                (i == 5 && j == 5) || (i == 25 && j == 5) || (i == 24 && j == 5) || (i == 5 && j == 24))
-            {
-                printf("██");
-            }
-            else if ((j > 1 && j < 28 && i > 9 && i < 20) || (i > 1 && i < 28 && j > 9 && j < 20) || (j > 19 && j < 28 && i > 19 && i < 28))
-            {
-                if (rand() % 2 == 0)
-                {
-                    printf("██");
-                }
-                else
-                {
-                    printf("  ");
-                }
-            }
-            else
-            {
-                printf("  ");
-            }
-        }
-        printf("\n");
-    }
-    com_printLine();
-}
-
 // Function to check if the date and time are in the future
 int com_isFutureDateTime(char *dateStr, char *timeStr)
 {
@@ -761,7 +720,6 @@ int com_getIntInput(char *prompt, int min, int max)
     char inputStr[20];
     while (1)
     {
-        // com_clearInputBuffer();
         printf("%s", prompt);
         fgets(inputStr, sizeof(inputStr), stdin);
         if (sscanf(inputStr, "%d", &value) != 1)
@@ -783,15 +741,4 @@ void com_clearInputBuffer()
     int c;
     while ((c = getchar()) != '\n' && c != EOF)
         ;
-}
-
-void com_freeBookingList()
-{
-    com_BookingNode *current = com_bookingList;
-    while (current)
-    {
-        com_BookingNode *temp = current;
-        current = current->next;
-        free(temp);
-    }
 }

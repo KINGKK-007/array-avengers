@@ -1,6 +1,6 @@
 #ifndef CONTRACTOR
 #define CONTRACTOR
 
-int adminLogin();
+void ContractorLogin();
 
 #endif

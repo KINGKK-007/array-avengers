@@ -18,13 +18,10 @@ typedef struct {
 // Function prototypes
 void contractorMenu(Event events[], int totalTasks);
 void viewTasks(Event events[], int totalTasks);
-void acceptOrDeclineTask(Event events[], int totalTasks);
-void updateProgress(Event events[], int totalTasks);
-void markAsCompleted(Event events[], int totalTasks);
-int authenticateContractor();
 void contractorRegister();
 void welcomeMessage();
-void displayMenu();
+void contractor_displayMenu();
+int authenticateContractor();
 void decorativeLine(char ch, int length);
 
 // Welcome message
@@ -44,7 +41,7 @@ void welcomeMessage() {
 }
 
 // Display main menu
-void displayMenu() {
+void contractor_displayMenu() {
     decorativeLine('=', 50);
     printf("      ** CONTRACTOR MENU **\n");
     decorativeLine('=', 50);
@@ -71,7 +68,7 @@ void decorativeLine(char ch, int length) {
     printf("\n");
 }
 
-int main() {
+void ContractorLogin() {
     // SetConsoleOutputCP(CP_UTF8); // Enable UTF-8 encoding for Windows console
     int choice;
 
@@ -86,7 +83,7 @@ int main() {
     welcomeMessage();
 
     while (1) {
-        displayMenu();
+        contractor_displayMenu();
         scanf("%d", &choice);
         switch (choice) {
             case 1:
@@ -112,157 +109,8 @@ int main() {
 #endif
         }
     }
-
-    return 0;
 }
 
-// Contractor menu
-void contractorMenu(Event events[], int totalTasks) {
-    int choice;
-    while (1) {
-        decorativeLine('~', 50);
-        printf("CONTRACTOR DASHBOARD\n");
-        decorativeLine('~', 50);
-
-        printf("1. View Assigned Tasks\n");
-        printf("2. Accept/Decline Tasks\n");
-        printf("3. Update Task Progress\n");
-        printf("4. Mark Task as Completed\n");
-        printf("5. Back to Main Menu\n");
-        decorativeLine('-', 50);
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
-
-        switch (choice) {
-            case 1:
-                viewTasks(events, totalTasks);
-                break;
-            case 2:
-                acceptOrDeclineTask(events, totalTasks);
-                break;
-            case 3:
-                updateProgress(events, totalTasks);
-                break;
-            case 4:
-                markAsCompleted(events, totalTasks);
-                break;
-            case 5:
-                return; // Go back to the main menu
-            default:
-                printf("\nInvalid choice! Please try again.\n");
-        }
-    }
-}
-
-// View tasks
-void viewTasks(Event events[], int totalTasks) {
-    decorativeLine('=', 40);
-    printf("ASSIGNED TASKS\n");
-    decorativeLine('=', 40);
-
-    for (int i = 0; i < totalTasks; i++) {
-        printf("Event ID: %d\n", events[i].eventID);
-        printf("   Name: %s\n", events[i].eventName);
-        printf("   Type: %s\n", events[i].eventType);
-        printf("   Deadline: %s\n", events[i].deadline);
-        printf("   Status: %s\n", events[i].status);
-        printf("   Progress: %d%%\n", events[i].progress);
-        decorativeLine('-', 40);
-    }
-
-    printf("\nPress Enter to go back...");
-    getchar();
-    getchar();
-}
-
-// Accept or decline task
-void acceptOrDeclineTask(Event events[], int totalTasks) {
-    int eventID, choice;
-    printf("\nEnter the Event ID to accept/decline (or type -1 to go back): ");
-    scanf("%d", &eventID);
-
-    if (eventID == -1) return;
-
-    for (int i = 0; i < totalTasks; i++) {
-        if (events[i].eventID == eventID) {
-            printf("\nEvent Details:\n");
-            printf("   Name: %s\n", events[i].eventName);
-            printf("   Type: %s\n", events[i].eventType);
-            printf("   Deadline: %s\n", events[i].deadline);
-            printf("   Status: %s\n", events[i].status);
-            printf("   Progress: %d%%\n", events[i].progress);
-
-            if (events[i].progress > 50) {
-                printf("\n❌ This event is more than 50%% completed and cannot be declined.\n");
-                return;
-            }
-
-            printf("\n1. Accept\n2. Decline\n");
-            printf("Enter your choice: ");
-            scanf("%d", &choice);
-            if (choice == 1) {
-                strcpy(events[i].status, "In Progress");
-                printf("\n✅ Event Accepted.\n");
-            } else if (choice == 2) {
-                strcpy(events[i].status, "Declined");
-                printf("\n🚫 Event Declined. Notifying Admin...\n");
-            } else {
-                printf("\nInvalid Choice.\n");
-            }
-            return;
-        }
-    }
-    printf("\n❌ Event ID not found.\n");
-}
-
-// Update task progress
-void updateProgress(Event events[], int totalTasks) {
-    int eventID, progress;
-    printf("\nEnter the Event ID to update progress (or type -1 to go back): ");
-    scanf("%d", &eventID);
-
-    if (eventID == -1) return;
-
-    for (int i = 0; i < totalTasks; i++) {
-        if (events[i].eventID == eventID) {
-            printf("Enter Progress Percentage (0-100): ");
-            scanf("%d", &progress);
-            if (progress >= 0 && progress <= 100) {
-                events[i].progress = progress;
-                if (progress < 100) {
-                    strcpy(events[i].status, "In Progress");
-                }
-                printf("\n✅ Progress Updated.\n");
-            } else {
-                printf("\nInvalid Progress Value.\n");
-            }
-            return;
-        }
-    }
-    printf("\n❌ Event ID not found.\n");
-}
-
-// Mark task as completed
-void markAsCompleted(Event events[], int totalTasks) {
-    int eventID;
-    printf("\nEnter the Event ID to mark as completed (or type -1 to go back): ");
-    scanf("%d", &eventID);
-
-    if (eventID == -1) return;
-
-    for (int i = 0; i < totalTasks; i++) {
-        if (events[i].eventID == eventID) {
-            events[i].progress = 100;
-            strcpy(events[i].status, "Completed");
-            printf("\n🎉 Task marked as Completed! Great Job!\n");
-            return;
-        }
-    }
-    printf("\n❌ Event ID not found.\n");
-}
-
-// Authenticate contractor
-// Authenticate contractor
 int authenticateContractor() {
     char input[50], password[50];
     char fileID[20], filePhone[20], fileUsername[50], filePassword[50], fileCity[50], fileState[50];
@@ -304,6 +152,56 @@ int authenticateContractor() {
 #endif
     return 0; // Login failed
 }
+
+
+// Contractor menu
+void contractorMenu(Event events[], int totalTasks) {
+    int choice;
+    while (1) {
+        decorativeLine('~', 50);
+        printf("CONTRACTOR DASHBOARD\n");
+        decorativeLine('~', 50);
+
+        printf("1. View Assigned Tasks\n");
+        printf("2. Back to Main Menu\n");
+        decorativeLine('-', 50);
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                viewTasks(events, totalTasks);
+                break;
+            case 2:
+                return; // Go back to the main menu
+            default:
+                printf("\nInvalid choice! Please try again.\n");
+        }
+    }
+}
+
+// View tasks
+void viewTasks(Event events[], int totalTasks) {
+    decorativeLine('=', 40);
+    printf("ASSIGNED TASKS\n");
+    decorativeLine('=', 40);
+
+    for (int i = 0; i < totalTasks; i++) {
+        printf("Event ID: %d\n", events[i].eventID);
+        printf("   Name: %s\n", events[i].eventName);
+        printf("   Type: %s\n", events[i].eventType);
+        printf("   Deadline: %s\n", events[i].deadline);
+        printf("   Status: %s\n", events[i].status);
+        printf("   Progress: %d%%\n", events[i].progress);
+        decorativeLine('-', 40);
+    }
+
+    printf("\nPress Enter to go back...");
+    getchar();
+    getchar();
+}
+
+
 
 // Register contractor
 void contractorRegister() {

@@ -29,7 +29,9 @@ int personal_isValidTime(char *timeStr);
 int personal_isFutureDateTime(char *dateStr, char *timeStr);
 int personal_getIntInput(char *prompt, int min, int max);
 void personal_clearInputBuffer();
+int personal_getTerminalWidth();
 
+// Booking structure
 typedef struct
 {
     char eventName[50];
@@ -43,7 +45,7 @@ typedef struct
     float totalAmount;
     char description[255];
     char status[20];
-    int mobileNumber;
+    char mobileNumber[15];
 } personal_Booking;
 
 typedef struct personal_BookingNode
@@ -96,7 +98,7 @@ void personal_loadBookingsFromCSV()
         strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
 
         token = strtok(NULL, ",");
-        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+        strncpy(newBooking.mobileNumber, token, sizeof(newBooking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
@@ -131,7 +133,7 @@ void personal_loadBookingsFromCSV()
 }
 void personal_saveBookingsToCSV()
 {
-    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
+    FILE *file = fopen("Bookings.csv", "a");
     if (!file)
     {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
@@ -144,11 +146,11 @@ void personal_saveBookingsToCSV()
     // Write all bookings to the file
     for (int i = 0; i < personal_bookingCount; i++)
     {
-        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
+        fprintf(file, "%s,%s,%s,%s,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n", 
                 bookings[i].eventName,
                 bookings[i].description,
                 bookings[i].date,
-                bookings[i].mobileNumber,
+                bookings[i].mobileNumber,  // Now stored as string
                 bookings[i].time,
                 bookings[i].venue,
                 bookings[i].numberOfPeople,
@@ -162,7 +164,7 @@ void personal_saveBookingsToCSV()
     fclose(file);
     printf("\033[1;32mBookings saved successfully to Bookings.csv\033[0m\n");
 }
-// Array of Personal Celebrations
+// Array of Events
 Event personal_events[] = {
     {"Birthday Parties", "Celebrate your special day with us.", 500.0},
     {"Weddings", "Make your wedding memorable.", 2000.0},
@@ -172,17 +174,6 @@ Event personal_events[] = {
     {"Baby Showers", "Celebrate the upcoming joy.", 700.0},
     {"Housewarming Parties", "Warm up your new home with friends.", 600.0},
 };
-
-int personal_getTerminalWidth()
-{
-    FILE *fp = popen("tput cols", "r");
-    if (!fp)
-        return 80; // Default width if the command fails
-    int width;
-    fscanf(fp, "%d", &width);
-    pclose(fp);
-    return width;
-}
 
 void personal_printLine()
 {
@@ -209,21 +200,21 @@ void personal_main()
     while (1)
     {
         int choice;
-        int width = personal_getTerminalWidth();
+        int width = personal_getTerminalWidth(); // Get terminal width for dynamic adjustments
 
         // Clear the screen
         system("clear");
 
         // Display the header
         personal_displayBanner(width);
-        personal_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO PERSONAL CELEBRATIONS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        personal_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO personal EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         personal_displayBanner(width);
 
         // Menu options
         printf("\n");
         personal_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
         personal_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
-        personal_displayCenteredText("3️⃣.  Exit", width, RED);                  // 3️⃣
+        personal_displayCenteredText("3️⃣. Exit", width, RED);                   // 3️⃣
         printf("\n");
 
         // Footer line
@@ -242,26 +233,27 @@ void personal_main()
             system("clear");
             personal_displayCenteredText("\xF0\x9F\x8E\x89 Booking an Event... \xF0\x9F\x8E\x89", width, GREEN); // 🎉
             personal_bookEvent();
-            sleep(2);
+            sleep(2); // Pause for 2 seconds before showing the next menu
             break;
 
         case 2:
             system("clear");
             personal_displayCenteredText("\xF0\x9F\x93\x8C Viewing All Bookings... \xF0\x9F\x93\x8C", width, BLUE); // 📌
             personal_viewBookings();
-            sleep(2);
+            sleep(2); // Pause for 2 seconds before showing the next menu
             break;
 
         case 3:
             system("clear");
             personal_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
-            sleep(2);
+            sleep(2); 
+            system("pkill afplay");                                          // Pause for 2 seconds before exiting
             exit(0);
 
         default:
             system("clear");
             personal_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
-            sleep(2);
+            sleep(2);                                                                                                      // Pause for 2 seconds before returning to menu
         }
     }
 }
@@ -275,7 +267,7 @@ void personal_cat_display()
 
     // Display header
     printf("\n");
-    personal_displayCenteredText("\xF0\x9F\x8E\x89 Personal Event Categories", width, MAGENTA BOLD); // 🎉
+    personal_displayCenteredText("\xF0\x9F\xA9\xBA Event Categories", width, MAGENTA BOLD); // 🩺
     printf("\n");
     for (int i = 0; i < width; i++) // Print top border
         printf("%s=%s", CYAN, RESET);
@@ -306,11 +298,23 @@ void personal_cat_display()
     printf("%s> %s", BOLD, RESET);
 }
 
+int personal_getTerminalWidth()
+{
+    FILE *fp = popen("tput cols", "r");
+    if (!fp)
+        return 80; // Default width if the personalmand fails
+    int width;
+    fscanf(fp, "%d", &width);
+    pclose(fp);
+    return width;
+}
+
 void personal_bookEvent()
 {
     char choiceStr[10];
     int eventChoice;
     personal_Booking newBooking;
+    strncpy(newBooking.mobileNumber, mobile_number, sizeof(newBooking.mobileNumber) - 1);
     char confirmStr[10];
     char confirm;
 
@@ -527,7 +531,7 @@ void personal_viewBookings()
         strncpy(booking.date, token, sizeof(booking.date) - 1);
 
         token = strtok(NULL, ",");
-        booking.mobileNumber = atoi(token);
+        strncpy(booking.mobileNumber, token, sizeof(booking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(booking.time, token, sizeof(booking.time) - 1);
@@ -554,7 +558,7 @@ void personal_viewBookings()
         strncpy(booking.status, token, sizeof(booking.status) - 1);
 
         // Check if this booking belongs to the current user
-        if (booking.mobileNumber == mobile_number)
+        if (strcmp(booking.mobileNumber, mobile_number) == 0) // Compare as strings
         {
             foundBooking = 1;
             lineCount++;
@@ -628,6 +632,7 @@ void personal_displayQRCode()
 void personal_exitProgram()
 {
     printf("\nExiting...\n");
+    system("pkill afplay");
     exit(0);
 }
 
@@ -716,7 +721,6 @@ int personal_getIntInput(char *prompt, int min, int max)
     while (1)
     {
         printf("%s", prompt);
-        // personal_clearInputBuffer();
         fgets(inputStr, sizeof(inputStr), stdin);
         if (sscanf(inputStr, "%d", &value) != 1)
         {
@@ -737,15 +741,4 @@ void personal_clearInputBuffer()
     int c;
     while ((c = getchar()) != '\n' && c != EOF)
         ;
-}
-
-void personal_freeBookingList()
-{
-    personal_BookingNode *current = personal_bookingList;
-    while (current)
-    {
-        personal_BookingNode *temp = current;
-        current = current->next;
-        free(temp);
-    }
 }

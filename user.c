@@ -9,6 +9,7 @@
 #include "prof.h"
 #include "corp.h"
 #include "global_user.h"
+#define CSV_FILE "users.csv"
 
 // ANSI color codes for macOS/Linux
 #define RESET "\033[0m"
@@ -29,8 +30,8 @@ void corp_main();
 int user_getTerminalWidth();
 void user_displayWelcomeBanner(int width);
 void user_displayCenteredText(const char *text, int width, const char *color);
-int check_number_in_csv(int number);
-void save_user_to_csv(const char *name, const char *city, int number, int password, const char *email);
+int check_number_in_csv(const char *number);
+void save_user_to_csv(const char *name, const char *city, const char *number, int password, const char *email);
 void user_first_page();
 void user_up();
 void user_in();
@@ -41,7 +42,7 @@ void userLogin();
 char name[100], city[100], email[100];
 int customer_number, enter_password, reenter_password;
 
-void save_user_to_csv(const char *name, const char *city, int number, int password, const char *email)
+void save_user_to_csv(const char *name, const char *city, const char *number, int password, const char *email)
 {
     FILE *file = fopen(CSV_FILE, "a");
     if (!file)
@@ -49,9 +50,11 @@ void save_user_to_csv(const char *name, const char *city, int number, int passwo
         printf("Error: Could not open CSV file for writing.\n");
         exit(1);
     }
-    fprintf(file, "%s,%s,%d,%d,%s\n", name, city, number, password, email);
+    // Write to CSV file. Use %s for the mobile number as it's now a string.
+    fprintf(file, "%s,%s,%s,%d,%s\n", name, city, number, password, email);
     fclose(file);
 }
+
 
 int check_email_in_csv(const char *email)
 {
@@ -76,19 +79,22 @@ int check_email_in_csv(const char *email)
     return 0; // Email not found
 }
 
-int check_number_in_csv(int number)
+int check_number_in_csv(const char *number)
 {
     FILE *file = fopen(CSV_FILE, "r");
     if (!file)
         return 0; // If file doesn't exist, assume no duplicate
 
     char line[256];
-    int stored_number;
+    char stored_number[15]; // Store the mobile number as a string
 
     while (fgets(line, sizeof(line), file))
     {
-        sscanf(line, "%*[^,],%*[^,],%d,%*d", &stored_number); // Extract the number
-        if (stored_number == number)
+        // Extract the mobile number from the CSV (assuming the mobile number is in the third field)
+        sscanf(line, "%*[^,],%*[^,],%s,%*d,%*s", stored_number); // Read the mobile number as a string
+
+        // Compare the input number with the stored number
+        if (strcmp(stored_number, number) == 0)
         {
             fclose(file);
             return 1; // Number found
@@ -98,6 +104,7 @@ int check_number_in_csv(int number)
     fclose(file);
     return 0; // Number not found
 }
+
 
 void user_up()
 {
@@ -122,14 +129,15 @@ void user_up()
         printf("%s> %s", BOLD, RESET);
         fgets(city, sizeof(city), stdin);
         city[strcspn(city, "\n")] = '\0';
-
-        // Prompt for mobile number
+        while (getchar() != '\n' && getchar() != EOF);
+        // Prompt for mobile number (as a string now)
         user_displayCenteredText("Enter Mobile Number to register:", width, YELLOW);
         printf("%s> %s", BOLD, RESET);
-        scanf("%d", &customer_number);
+        fgets(mobile_number, sizeof(mobile_number), stdin); // Read the mobile number as a string
+        mobile_number[strcspn(mobile_number, "\n")] = '\0';  // Remove newline character
 
         // Check if number exists
-        if (check_number_in_csv(customer_number))
+        if (check_number_in_csv(mobile_number))
         {
             user_displayCenteredText("\xF0\x9F\x98\x95 Number already found in database. Choose an option below:", width, RED); // 😕
             printf("\n");
@@ -198,10 +206,9 @@ void user_up()
             }
             else
             {
-                save_user_to_csv(name, city, customer_number, enter_password, email);
+                save_user_to_csv(name, city, mobile_number, enter_password, email); // Save mobile_number as a string
                 user_displayCenteredText("\xF0\x9F\x8E\x89 Registration successful!", width, GREEN); // 🎉
-                usleep(2000000);                                                                     // Pause for 2 seconds
-                mobile_number = customer_number;  
+                usleep(2000000); // Pause for 2 seconds
                 user_first_page();
                 return;
             }
@@ -222,19 +229,24 @@ void user_in()
     user_displayCenteredText("\xF0\x9F\x85\x9F User Login", width, CYAN); // 1️⃣
 
     // Variables for login
-    int customer_number, password;
+    char customer_number[15]; // Mobile number is now a string
+    int password;
+
+    // Clear input buffer before using fgets
+    while (getchar() != '\n' && getchar() != EOF);  // Clear the buffer
 
     // Prompt for mobile number
     printf("\n");
     user_displayCenteredText("Enter your registered Mobile Number:", width, YELLOW);
     printf("%s> %s", BOLD, RESET);
-    scanf("%d", &customer_number);
+    fgets(customer_number, sizeof(customer_number), stdin);
+    customer_number[strcspn(customer_number, "\n")] = '\0'; // Remove newline character
 
     // Prompt for password
     printf("\n");
     user_displayCenteredText("Enter your password:", width, YELLOW);
     printf("%s> %s", BOLD, RESET);
-    scanf("%d", &password);
+    scanf("%d", &password);  // Password is still an integer
 
     // Open the CSV file
     FILE *file = fopen(CSV_FILE, "r");
@@ -247,16 +259,17 @@ void user_in()
     }
 
     // Variables to read data from the file
-    char line[256], stored_name[100], stored_city[100];
-    int stored_number, stored_password;
+    char line[256], stored_name[100], stored_city[100], stored_number[15];
+    int stored_password;
 
     // Read the CSV file line by line
     while (fgets(line, sizeof(line), file))
     {
-        sscanf(line, "%[^,],%[^,],%d,%d", stored_name, stored_city, &stored_number, &stored_password);
+        // Parse the data
+        sscanf(line, "%[^,],%[^,],%[^,],%d", stored_name, stored_city, stored_number, &stored_password);
 
         // Check if the credentials match
-        if (stored_number == customer_number && stored_password == password)
+        if (strcmp(stored_number, customer_number) == 0 && stored_password == password)
         {
             printf("\n");
             char welcome_msg[200];
@@ -266,7 +279,8 @@ void user_in()
             fclose(file);
             sleep(2);
 
-            mobile_number = customer_number;
+            // If login successful, set mobile_number to the logged-in user's number
+            strcpy(mobile_number, stored_number);
             user_first_page();
             return;
         }
@@ -393,7 +407,7 @@ void user_first_page()
             sleep(2); // Wait for 2 seconds
             break;
         case 2:
-            // com_main();
+            com_main();
             printf("\n");
             sleep(2); // Wait for 2 seconds
             break;

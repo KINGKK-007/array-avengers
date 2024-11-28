@@ -6,18 +6,16 @@
 #include "global_user.h"
 
 #define MAX_BOOKINGS 100
-
 #define RESET "\033[0m"
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define BLUE "\033[34m"
-#define MAGENTA "\033[35m"
-#define CYAN "\033[36m"
 #define BOLD "\033[1m"
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define MAGENTA "\033[35m"
+#define YELLOW "\033[1;33m"
+#define BLUE "\033[1;34m"
+#define CYAN "\033[1;36m"
 
 // Function prototypes
-
 void corp_main();
 void corp_cat_display();
 void corp_bookEvent();
@@ -31,6 +29,7 @@ int corp_isValidTime(char *timeStr);
 int corp_isFutureDateTime(char *dateStr, char *timeStr);
 int corp_getIntInput(char *prompt, int min, int max);
 void corp_clearInputBuffer();
+int corp_getTerminalWidth();
 
 // Booking structure
 typedef struct
@@ -46,7 +45,7 @@ typedef struct
     float totalAmount;
     char description[255];
     char status[20];
-    int mobileNumber;
+    char mobileNumber[15];
 } corp_Booking;
 
 typedef struct corp_BookingNode
@@ -67,37 +66,6 @@ typedef struct
     char description[255];
     float feePerPerson;
 } Event;
-
-int corp_getTerminalWidth()
-{
-    FILE *fp = popen("tput cols", "r");
-    if (!fp)
-        return 80; // Default width if the command fails
-    int width;
-    fscanf(fp, "%d", &width);
-    pclose(fp);
-    return width;
-}
-
-void corp_printLine()
-{
-    printf("\033[1;36m%s\033[0m\n", "=======================================================");
-}
-
-void corp_displayCenteredText(const char *text, int width, const char *color)
-{
-    int padding = (width - (int)strlen(text)) / 2;
-    for (int i = 0; i < padding; i++)
-        printf(" ");
-    printf("%s%s%s\n", color, text, RESET);
-}
-
-void corp_displayBanner(int width)
-{
-    for (int i = 0; i < width; i++)
-        printf("\033[1;36m=\033[0m");
-    printf("\n");
-}
 
 void corp_loadBookingsFromCSV()
 {
@@ -130,7 +98,7 @@ void corp_loadBookingsFromCSV()
         strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
 
         token = strtok(NULL, ",");
-        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+        strncpy(newBooking.mobileNumber, token, sizeof(newBooking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
@@ -165,7 +133,7 @@ void corp_loadBookingsFromCSV()
 }
 void corp_saveBookingsToCSV()
 {
-    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
+    FILE *file = fopen("Bookings.csv", "a");
     if (!file)
     {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
@@ -178,11 +146,11 @@ void corp_saveBookingsToCSV()
     // Write all bookings to the file
     for (int i = 0; i < corp_bookingCount; i++)
     {
-        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
+        fprintf(file, "%s,%s,%s,%s,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n", 
                 bookings[i].eventName,
                 bookings[i].description,
                 bookings[i].date,
-                bookings[i].mobileNumber,
+                bookings[i].mobileNumber,  // Now stored as string
                 bookings[i].time,
                 bookings[i].venue,
                 bookings[i].numberOfPeople,
@@ -196,7 +164,7 @@ void corp_saveBookingsToCSV()
     fclose(file);
     printf("\033[1;32mBookings saved successfully to Bookings.csv\033[0m\n");
 }
-// Array of Corporate Events
+// Array of Events
 Event corp_events[] = {
     {"Business Conferences", "Attend high-level business conferences.", 2500.0},
     {"Product Launches", "Experience the unveiling of new products.", 2000.0},
@@ -206,6 +174,26 @@ Event corp_events[] = {
     {"Corporate Workshops", "Hands-on workshops on corporate skills.", 1700.0},
     {"Board Meetings", "Organize formal board meetings.", 2200.0},
 };
+
+void corp_printLine()
+{
+    printf("\033[1;36m%s\033[0m\n", "=======================================================");
+}
+
+void corp_displayCenteredText(const char *text, int width, const char *color)
+{
+    int padding = (width - (int)strlen(text)) / 2;
+    for (int i = 0; i < padding; i++)
+        printf(" ");
+    printf("%s%s%s\n", color, text, RESET);
+}
+
+void corp_displayBanner(int width)
+{
+    for (int i = 0; i < width; i++)
+        printf("\033[1;36m=\033[0m");
+    printf("\n");
+}
 
 void corp_main()
 {
@@ -219,14 +207,14 @@ void corp_main()
 
         // Display the header
         corp_displayBanner(width);
-        corp_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO CORPORATE EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        corp_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO corp EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         corp_displayBanner(width);
 
         // Menu options
         printf("\n");
         corp_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
         corp_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
-        corp_displayCenteredText("3️⃣.  Exit", width, RED);                  // 3️⃣
+        corp_displayCenteredText("3️⃣. Exit", width, RED);                   // 3️⃣
         printf("\n");
 
         // Footer line
@@ -256,16 +244,16 @@ void corp_main()
             break;
 
         case 3:
-            system("clear");                                                                                  
+            system("clear");
             corp_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
-            sleep(2);
-            system("pkill afplay");                                                                                                  // Pause for 2 seconds before exiting
+            sleep(2); 
+            system("pkill afplay");                                          // Pause for 2 seconds before exiting
             exit(0);
 
         default:
             system("clear");
             corp_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
-            sleep(2);                                                                                                    // Pause for 2 seconds before returning to menu
+            sleep(2);                                                                                                      // Pause for 2 seconds before returning to menu
         }
     }
 }
@@ -279,7 +267,7 @@ void corp_cat_display()
 
     // Display header
     printf("\n");
-    corp_displayCenteredText("\xF0\x9F\x92\xBC Event Categories", width, MAGENTA BOLD); // 💼
+    corp_displayCenteredText("\xF0\x9F\xA9\xBA Event Categories", width, MAGENTA BOLD); // 🩺
     printf("\n");
     for (int i = 0; i < width; i++) // Print top border
         printf("%s=%s", CYAN, RESET);
@@ -310,11 +298,23 @@ void corp_cat_display()
     printf("%s> %s", BOLD, RESET);
 }
 
+int corp_getTerminalWidth()
+{
+    FILE *fp = popen("tput cols", "r");
+    if (!fp)
+        return 80; // Default width if the corpmand fails
+    int width;
+    fscanf(fp, "%d", &width);
+    pclose(fp);
+    return width;
+}
+
 void corp_bookEvent()
 {
     char choiceStr[10];
     int eventChoice;
     corp_Booking newBooking;
+    strncpy(newBooking.mobileNumber, mobile_number, sizeof(newBooking.mobileNumber) - 1);
     char confirmStr[10];
     char confirm;
 
@@ -531,7 +531,7 @@ void corp_viewBookings()
         strncpy(booking.date, token, sizeof(booking.date) - 1);
 
         token = strtok(NULL, ",");
-        booking.mobileNumber = atoi(token);
+        strncpy(booking.mobileNumber, token, sizeof(booking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(booking.time, token, sizeof(booking.time) - 1);
@@ -558,7 +558,7 @@ void corp_viewBookings()
         strncpy(booking.status, token, sizeof(booking.status) - 1);
 
         // Check if this booking belongs to the current user
-        if (booking.mobileNumber == mobile_number)
+        if (strcmp(booking.mobileNumber, mobile_number) == 0) // Compare as strings
         {
             foundBooking = 1;
             lineCount++;
@@ -585,7 +585,6 @@ void corp_viewBookings()
     getchar(); // Wait for user input to return to menu
 }
 
-// Function to display a QR code with solid edges and random interior
 void corp_displayQRCode()
 {
     system("clear");

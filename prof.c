@@ -29,6 +29,7 @@ int prof_isValidTime(char *timeStr);
 int prof_isFutureDateTime(char *dateStr, char *timeStr);
 int prof_getIntInput(char *prompt, int min, int max);
 void prof_clearInputBuffer();
+int prof_getTerminalWidth();
 
 // Booking structure
 typedef struct
@@ -44,7 +45,7 @@ typedef struct
     float totalAmount;
     char description[255];
     char status[20];
-    int mobileNumber;
+    char mobileNumber[15];
 } prof_Booking;
 
 typedef struct prof_BookingNode
@@ -65,37 +66,6 @@ typedef struct
     char description[255];
     float feePerPerson;
 } Event;
-
-int prof_getTerminalWidth()
-{
-    FILE *fp = popen("tput cols", "r");
-    if (!fp)
-        return 80; // Default width if the command fails
-    int width;
-    fscanf(fp, "%d", &width);
-    pclose(fp);
-    return width;
-}
-
-void prof_printLine()
-{
-    printf("\033[1;36m%s\033[0m\n", "=======================================================");
-}
-
-void prof_displayCenteredText(const char *text, int width, const char *color)
-{
-    int padding = (width - (int)strlen(text)) / 2;
-    for (int i = 0; i < padding; i++)
-        printf(" ");
-    printf("%s%s%s\n", color, text, RESET);
-}
-
-void prof_displayBanner(int width)
-{
-    for (int i = 0; i < width; i++)
-        printf("\033[1;36m=\033[0m");
-    printf("\n");
-}
 
 void prof_loadBookingsFromCSV()
 {
@@ -128,7 +98,7 @@ void prof_loadBookingsFromCSV()
         strncpy(newBooking.date, token, sizeof(newBooking.date) - 1);
 
         token = strtok(NULL, ",");
-        newBooking.mobileNumber = atoi(token); // Mobile number as integer
+        strncpy(newBooking.mobileNumber, token, sizeof(newBooking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(newBooking.time, token, sizeof(newBooking.time) - 1);
@@ -163,7 +133,7 @@ void prof_loadBookingsFromCSV()
 }
 void prof_saveBookingsToCSV()
 {
-    FILE *file = fopen("Bookings.csv", "w"); // Overwrite the file with updated data
+    FILE *file = fopen("Bookings.csv", "a");
     if (!file)
     {
         printf("\033[1;31mError: Unable to open CSV file for writing.\033[0m\n");
@@ -176,11 +146,11 @@ void prof_saveBookingsToCSV()
     // Write all bookings to the file
     for (int i = 0; i < prof_bookingCount; i++)
     {
-        fprintf(file, "%s,%s,%s,%d,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n",
+        fprintf(file, "%s,%s,%s,%s,%s,%s,%d,%.2f,%.2f,%.2f,%.2f,%s\n", 
                 bookings[i].eventName,
                 bookings[i].description,
                 bookings[i].date,
-                bookings[i].mobileNumber,
+                bookings[i].mobileNumber,  // Now stored as string
                 bookings[i].time,
                 bookings[i].venue,
                 bookings[i].numberOfPeople,
@@ -194,7 +164,7 @@ void prof_saveBookingsToCSV()
     fclose(file);
     printf("\033[1;32mBookings saved successfully to Bookings.csv\033[0m\n");
 }
-// Array of Professional Development Events
+// Array of Events
 Event prof_events[] = {
     {"Leadership Training", "Enhance your leadership skills.", 2500.0},
     {"Communication Skills Workshops", "Improve your communication abilities.", 2000.0},
@@ -204,6 +174,26 @@ Event prof_events[] = {
     {"Career Advancement Workshops", "Plan your career growth.", 2100.0},
     {"Team Building Sessions", "Strengthen team dynamics.", 1900.0},
 };
+
+void prof_printLine()
+{
+    printf("\033[1;36m%s\033[0m\n", "=======================================================");
+}
+
+void prof_displayCenteredText(const char *text, int width, const char *color)
+{
+    int padding = (width - (int)strlen(text)) / 2;
+    for (int i = 0; i < padding; i++)
+        printf(" ");
+    printf("%s%s%s\n", color, text, RESET);
+}
+
+void prof_displayBanner(int width)
+{
+    for (int i = 0; i < width; i++)
+        printf("\033[1;36m=\033[0m");
+    printf("\n");
+}
 
 void prof_main()
 {
@@ -217,14 +207,14 @@ void prof_main()
 
         // Display the header
         prof_displayBanner(width);
-        prof_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO EDUCATIONAL EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        prof_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO prof EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         prof_displayBanner(width);
 
         // Menu options
         printf("\n");
         prof_displayCenteredText("1️⃣.  Book an Event", width, YELLOW BOLD); // 1️⃣
         prof_displayCenteredText("2️⃣.  View All Bookings", width, BLUE);    // 2️⃣
-        prof_displayCenteredText("3️⃣.  Exit", width, RED);                  // 3️⃣
+        prof_displayCenteredText("3️⃣. Exit", width, RED);                   // 3️⃣
         printf("\n");
 
         // Footer line
@@ -254,15 +244,16 @@ void prof_main()
             break;
 
         case 3:
-            system("clear");                                                                                
+            system("clear");
             prof_displayCenteredText("\xF0\x9F\x9A\xAA Exiting the Program. Thank you! \xF0\x9F\x9A\xAA", width, BLUE); // 🚪
-            sleep(2);                                                                                                   // Pause for 2 seconds before exiting
+            sleep(2); 
+            system("pkill afplay");                                          // Pause for 2 seconds before exiting
             exit(0);
 
         default:
             system("clear");
             prof_displayCenteredText("\xF0\x9F\x98\xB1 Invalid choice! Please try again. \xF0\x9F\x98\xB1", width, RED); // 😱
-            sleep(2);                                                                                                    // Pause for 2 seconds before returning to menu
+            sleep(2);                                                                                                      // Pause for 2 seconds before returning to menu
         }
     }
 }
@@ -276,7 +267,7 @@ void prof_cat_display()
 
     // Display header
     printf("\n");
-    prof_displayCenteredText("\xF0\x9F\x91\xA9\u200D\xF0\x9F\x92\xBC Event Categories", width, MAGENTA BOLD); // 🧑‍💼
+    prof_displayCenteredText("\xF0\x9F\xA9\xBA Event Categories", width, MAGENTA BOLD); // 🩺
     printf("\n");
     for (int i = 0; i < width; i++) // Print top border
         printf("%s=%s", CYAN, RESET);
@@ -307,11 +298,23 @@ void prof_cat_display()
     printf("%s> %s", BOLD, RESET);
 }
 
+int prof_getTerminalWidth()
+{
+    FILE *fp = popen("tput cols", "r");
+    if (!fp)
+        return 80; // Default width if the profmand fails
+    int width;
+    fscanf(fp, "%d", &width);
+    pclose(fp);
+    return width;
+}
+
 void prof_bookEvent()
 {
     char choiceStr[10];
     int eventChoice;
     prof_Booking newBooking;
+    strncpy(newBooking.mobileNumber, mobile_number, sizeof(newBooking.mobileNumber) - 1);
     char confirmStr[10];
     char confirm;
 
@@ -528,7 +531,7 @@ void prof_viewBookings()
         strncpy(booking.date, token, sizeof(booking.date) - 1);
 
         token = strtok(NULL, ",");
-        booking.mobileNumber = atoi(token);
+        strncpy(booking.mobileNumber, token, sizeof(booking.mobileNumber) - 1); // Read as string
 
         token = strtok(NULL, ",");
         strncpy(booking.time, token, sizeof(booking.time) - 1);
@@ -555,7 +558,7 @@ void prof_viewBookings()
         strncpy(booking.status, token, sizeof(booking.status) - 1);
 
         // Check if this booking belongs to the current user
-        if (booking.mobileNumber == mobile_number)
+        if (strcmp(booking.mobileNumber, mobile_number) == 0) // Compare as strings
         {
             foundBooking = 1;
             lineCount++;
@@ -582,7 +585,6 @@ void prof_viewBookings()
     getchar(); // Wait for user input to return to menu
 }
 
-// Function to display a QR code with solid edges and random interior
 void prof_displayQRCode()
 {
     system("clear");
@@ -630,6 +632,7 @@ void prof_displayQRCode()
 void prof_exitProgram()
 {
     printf("\nExiting...\n");
+    system("pkill afplay");
     exit(0);
 }
 

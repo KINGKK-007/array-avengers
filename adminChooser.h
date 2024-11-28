@@ -1,6 +1,6 @@
 #ifndef ADMIN
 #define ADMIN
  
-int ALogin();
+void adminLogin();
 
 #endif

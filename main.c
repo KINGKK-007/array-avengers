@@ -15,6 +15,8 @@
 
 // Function declarations
 void userLogin();
+void adminLogin();
+void ContractorLogin();
 void displayWelcomeBanner(int width);
 void displayCenteredText(const char *text, int width, const char *color);
 int getTerminalWidth();
@@ -92,15 +94,13 @@ void MainMenu()
             userLogin();
             break;
         case 2:
-            // AdminLogin();
+            adminLogin();
             printf("\n");
-            displayCenteredText("[Feature Coming Soon: Admin Login]", width, CYAN);
             sleep(2); // Wait for 2 seconds
             break;
         case 3:
-            // ContractorLogin();
+            ContractorLogin();
             printf("\n");
-            displayCenteredText("[Feature Coming Soon: Contractor Login]", width, CYAN);
             sleep(2); // Wait for 2 seconds
             break;
         case 4:
