@@ -58,6 +58,7 @@
 <!-- Embed the audio player with controls -->
 <audio controls>
   <source src="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.mp3" type="audio/mpeg">
+  <source src="https://raw.githubusercontent.com/KINGKK-007/array-avengers/main/river_flows_in_you.ogg" type="audio/ogg">
   Your browser does not support the audio element.
 </audio>
 
