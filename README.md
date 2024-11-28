@@ -115,7 +115,7 @@
 </p>
 
 <p>
-  <strong>Kabir Ahuja (Project Leader & DevOps)</strong><br>
+  <strong>Kabir Ahuja (Project Leader)</strong><br>
   Role: Kabir led the project, overseeing integration and deployment, and coordinated the team’s efforts for a successful project delivery.<br><br>
   <a href="https://www.linkedin.com/in/kabir-ahuja-354a53320/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank">
     <img src="https://img.shields.io/static/v1?message=Kabir%20Ahuja&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="Kabir's LinkedIn" />
