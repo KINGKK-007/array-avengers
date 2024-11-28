@@ -30,14 +30,11 @@
 <p>
   <strong>Usage:</strong><br>
   1. Clone the repository<br>
-  ```bash
   git clone <repository_url><br>
   2. Compile the Program<br>
   open the terminal and type make<br>
-  ```bash
   3. Run the Program<br>
   ./program<br>
-  ```bash
   4. Log in<br>
   Choose one of the following login options based on your role:<br>
   User Login<br>
