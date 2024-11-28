@@ -53,6 +53,8 @@
   <li>edu.c – Manages educational event categories and bookings.</li>
   <li>user.c – Manages user login, registration, and displays event categories.</li>
   <li>contractor.c – Manages contractor login, task assignment, and progress tracking.</li>
+  <li>personalCeleb.c-the file holds functions which covers the event management related to personal achivements or gatherings.</li>
+  
  
 </ul>
 
