@@ -9,7 +9,6 @@
 #define MAX_BOOKINGS 100
 #define MAX_LINE_LENGTH 1024
 
-// ANSI color codes
 #define RESET "\033[0m"
 #define RED "\033[31m"
 #define GREEN "\033[32m"
@@ -19,6 +18,70 @@
 #define CYAN "\033[36m"
 #define PINK "\033[38;5;200m" 
 #define WHITE "\033[0;97m"  
+#define MAX_COLUMNS 20
+
+void showtenBookings();
+int compareDates(const void *a, const void *b);
+
+// Function to split a line into columns by a comma
+int split_line(char *line, char columns[MAX_COLUMNS][MAX_LINE_LENGTH]) {
+    int col_count = 0;
+    char *token = strtok(line, ",");
+    
+    while (token != NULL) {
+        strncpy(columns[col_count], token, MAX_LINE_LENGTH);
+        col_count++;
+        token = strtok(NULL, ",");
+    }
+    return col_count;
+}
+
+void create_new_event_csv(const char *input_file, const char *output_file) {
+    FILE *infile = fopen(input_file, "r");
+    if (infile == NULL) {
+        printf("Error opening input file: %s\n", input_file);
+        return;
+    }
+
+    FILE *outfile = fopen(output_file, "w");
+    if (outfile == NULL) {
+        printf("Error opening output file: %s\n", output_file);
+        fclose(infile);
+        return;
+    }
+
+    char line[MAX_LINE_LENGTH];
+    char columns[MAX_COLUMNS][MAX_LINE_LENGTH];
+
+    // Write the header row to the output file
+    fprintf(outfile, "Genre,Sub Genre,Date,Contractor ID,Work Status,Work Progress\n");
+
+    // Read and process each line of the input file
+    while (fgets(line, sizeof(line), infile)) {
+        // Remove the newline character at the end if present
+        line[strcspn(line, "\n")] = '\0';
+
+        // Split the line into columns
+        int col_count = split_line(line, columns);
+
+        if (col_count >= 13) {
+            // Extract the specific columns based on the required indices (1-based index)
+            const char *genre = columns[0];              // Column 1: Genre
+            const char *sub_genre = columns[1];          // Column 2: Sub Genre
+            const char *date = columns[3];               // Column 4: Date
+            const char *contractor_id = columns[12];     // Column 13: Contractor ID
+            
+            // Write the new row to the output file
+            fprintf(outfile, "%s,%s,%s,%s,pending,0\n", genre, sub_genre, date, contractor_id);
+        }
+    }
+
+    // Close the files
+    fclose(infile);
+    fclose(outfile);
+
+    printf("New CSV file '%s' has been created successfully.\n", output_file);
+}
 
 void clearScreen() {
     // Check the OS and run the appropriate command to clear the terminal screen
@@ -96,28 +159,117 @@ void Alogin() {
                 break;
             case 3:
                 printf(GREEN "Exiting the system. Goodbye!\n" RESET);
-                system("pkill afplay");
                 exit(0);
             default:
                 printf(RED "Invalid choice. Please try again.\n" RESET);
         }
     }
+}
+// Define a structure for Booking
+typedef struct {
+    char genre[100];
+    char subgenre[100];
+    char customerPhone[20];
+    char date[20];
+    char status[10];
+} Booking;
 
+// Define a node in the linked list for Booking
+typedef struct BookingNode {
+    Booking booking;
+    struct BookingNode *next;
+} BookingNode;
+
+// Function to create a new booking node
+BookingNode* createNode(Booking booking) {
+    BookingNode *newNode = (BookingNode*)malloc(sizeof(BookingNode));
+    if (newNode) {
+        newNode->booking = booking;
+        newNode->next = NULL;
+    }
+    return newNode;
 }
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+// Function to add a booking to the linked list
+void addBooking(BookingNode **head, Booking booking) {
+    BookingNode *newNode = createNode(booking);
+    if (*head == NULL) {
+        *head = newNode;
+    } else {
+        BookingNode *temp = *head;
+        while (temp->next) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+    }
+}
 
-#define BUFFER_SIZE 1024
-#define CYAN "\033[36m"
-#define RESET "\033[0m"
-#define GREEN "\033[32m"
-#define RED "\033[31m"
+// Function to display bookings from the linked list
+void displayBookings(BookingNode *head) {
+    printf("\n"CYAN "%-20s %-25s %-15s %-19s %-10s\n", "Genre", "Subgenre", "Customer Phone", "Date", "Status");
+    printf(CYAN "----------------------------------------------------------------------------\n");
 
-// Function to clear the input buffer (example placeholder)
-void clearScreen() {
-    printf("\033[H\033[J");
+    while (head) {
+        printf(PINK "%-20s %-25s %-15s %-15s %-10s\n",
+               head->booking.genre,
+               head->booking.subgenre,
+               head->booking.customerPhone,
+               head->booking.date,
+               head->booking.status);
+        head = head->next;
+    }
+    printf(RESET);
+}
+
+// Function to show the latest 10 bookings from the linked list
+void showTenBookings() {
+    FILE *file = fopen("bookings.csv", "r");
+    if (!file) {
+        perror(RED "Unable to open bookings.csv");
+        return;
+    }
+
+    BookingNode *head = NULL;
+    char line[MAX_LINE_LENGTH];
+    int bookingCount = 0;
+
+    // Read the CSV file line by line and add each booking to the linked list
+    while (fgets(line, sizeof(line), file)) {
+        Booking booking;
+        sscanf(line, "%99[^,],%99[^,],%19[^,],%19[^,],%9[^,]",
+               booking.genre,
+               booking.subgenre,
+               booking.customerPhone,
+               booking.date,
+               booking.status);
+
+        addBooking(&head, booking);
+        bookingCount++;
+    }
+
+    fclose(file);
+
+    // Sort the linked list based on the booking date (latest first)
+    BookingNode *temp = head;
+    BookingNode *arr[bookingCount];
+    int i = 0;
+
+    while (temp) {
+        arr[i++] = temp;
+        temp = temp->next;
+    }
+
+    qsort(arr, bookingCount, sizeof(BookingNode*), compareDates);
+
+    // Reconstruct the sorted linked list
+    head = arr[0];
+    for (i = 1; i < bookingCount; i++) {
+        arr[i - 1]->next = arr[i];
+    }
+    arr[bookingCount - 1]->next = NULL;
+
+    // Display the sorted bookings (latest first)
+    displayBookings(head);
 }
 
 void signUp() {
@@ -134,6 +286,7 @@ void signUp() {
     scanf("%5s", adminId);
 
     if (adminId[0] != 'A' || strlen(adminId) != 5) {
+        
         printf(RED "Invalid Admin ID format. It must start with 'A' and be 5 letters long.\n" RESET);
         fclose(readFile);
         return;
@@ -155,13 +308,8 @@ void signUp() {
         return;
     }
 
-    // Clear the buffer before reading the name (to handle the leftover newline character from previous scanf)
-    getchar();
-
     printf(CYAN "Enter Admin Name: " RESET);
-    // Read the admin name, including spaces
-    fgets(adminName, sizeof(adminName), stdin);
-    adminName[strcspn(adminName, "\n")] = '\0';  // Remove newline from the end of the string
+    scanf(" %[^\n]", adminName);
 
     while (1) {
         printf(CYAN "Enter Admin Phone Number (10 digits): " RESET);
@@ -174,15 +322,9 @@ void signUp() {
         }
     }
 
-    // Clear the buffer before reading the password
-    getchar();
-
     printf(CYAN "Enter Admin Password: " RESET);
-    // Read the password, including spaces
-    fgets(adminPassword, sizeof(adminPassword), stdin);
-    adminPassword[strcspn(adminPassword, "\n")] = '\0';  // Remove newline from the end of the string
+    scanf(" %[^\n]", adminPassword);
 
-    // Append the new admin data to the file
     fprintf(file, "%s,%s,%s,%s\n", adminId, adminName, adminPhone, adminPassword);
     fclose(file);
 
@@ -201,32 +343,17 @@ int logIn() {
         return 0;
     }
 
-    // Clear the input buffer before reading user inputs
     printf(CYAN "Enter Admin ID: " RESET);
-    if (scanf("%5s", adminId) != 1) {
-        printf(RED "Error reading Admin ID\n" RESET);
-        fclose(file);
-        return 0;
-    }
+    scanf("%5s", adminId);
 
-    // Clear the input buffer before reading the password
     printf(CYAN "Enter Admin Password: " RESET);
-    getchar();  // Consume the newline left in the buffer by previous scanf
-    if (fgets(adminPassword, sizeof(adminPassword), stdin) == NULL) {
-        printf(RED "Error reading Admin Password\n" RESET);
-        fclose(file);
-        return 0;
-    }
-
-    // Remove the trailing newline character left by fgets
-    adminPassword[strcspn(adminPassword, "\n")] = '\0';
-
+    scanf(" %[^\n]", adminPassword);
     clearScreen();
 
     while (fgets(buffer, sizeof(buffer), file)) {
         char *fileAdminId = strtok(buffer, ",");
-        strtok(NULL, ","); // Skip unused fields
-        strtok(NULL, ",");
+        strtok(NULL, ","); 
+        strtok(NULL, ","); 
         char *fileAdminPassword = strtok(NULL, "\n");
 
         if (fileAdminId != NULL) fileAdminId[strcspn(fileAdminId, "\r\n")] = '\0';
@@ -251,6 +378,7 @@ int logIn() {
 
     return found;
 }
+
 void viewEventDetails() {
     int subChoice;
     printf("\n" CYAN "View Event Details Options" RESET "\n");
@@ -452,116 +580,55 @@ void viewCustomerDetails() {
 
     fclose(file);
 }
-// Define a structure for Booking
-typedef struct {
-    char genre[100];
-    char subgenre[100];
-    char customerPhone[20];
-    char date[20];
-    char status[10];
-} Booking;
 
-// Define a node in the linked list for Booking
-typedef struct BookingNode {
-    Booking booking;
-    struct BookingNode *next;
-} BookingNode;
 
-// Function to create a new booking node
-BookingNode* createNode(Booking booking) {
-    BookingNode *newNode = (BookingNode*)malloc(sizeof(BookingNode));
-    if (newNode) {
-        newNode->booking = booking;
-        newNode->next = NULL;
-    }
-    return newNode;
-}
-
-// Function to add a booking to the linked list
-void addBooking(BookingNode **head, Booking booking) {
-    BookingNode *newNode = createNode(booking);
-    if (*head == NULL) {
-        *head = newNode;
-    } else {
-        BookingNode *temp = *head;
-        while (temp->next) {
-            temp = temp->next;
-        }
-        temp->next = newNode;
-    }
-}
-
-// Function to compare two dates (for sorting)
+// Function to compare two dates (for sorting in descending order)
 int compareDates(const void *a, const void *b) {
     return strcmp(((Booking*)b)->date, ((Booking*)a)->date);  // Sort descending (latest first)
 }
 
-// Function to display bookings from the linked list
-void displayBookings(BookingNode *head) {
-    printf("\n"CYAN "%-20s %-25s %-15s %-19s %-10s\n", "Genre", "Subgenre", "Customer Phone", "Date", "Status");
-    printf(CYAN "----------------------------------------------------------------------------\n");
-
-    while (head) {
-        printf(PINK "%-20s %-25s %-15s %-15s %-10s\n",
-               head->booking.genre,
-               head->booking.subgenre,
-               head->booking.customerPhone,
-               head->booking.date,
-               head->booking.status);
-        head = head->next;
-    }
-    printf(RESET);
-}
-
-// Function to show the latest 10 bookings from the linked list
-void showTenBookings() {
+// Function to show the latest 10 bookings
+void showtenBookings() {
     FILE *file = fopen("bookings.csv", "r");
     if (!file) {
         perror(RED "Unable to open bookings.csv");
         return;
     }
 
-    BookingNode *head = NULL;
-    char line[MAX_LINE_LENGTH];
+    Booking bookings[MAX_BOOKINGS];
     int bookingCount = 0;
 
-    // Read the CSV file line by line and add each booking to the linked list
+    char line[MAX_LINE_LENGTH];
+    
+    // Read the CSV file line by line
     while (fgets(line, sizeof(line), file)) {
-        Booking booking;
-        sscanf(line, "%99[^,],%99[^,],%19[^,],%19[^,],%9[^,]",
-               booking.genre,
-               booking.subgenre,
-               booking.customerPhone,
-               booking.date,
-               booking.status);
+        if (bookingCount >= MAX_BOOKINGS) break;  // Stop if we've reached the limit
 
-        addBooking(&head, booking);
+        // Parse the CSV line into relevant fields
+        sscanf(line, "%99[^,],%99[^,],%19[^,],%19[^,],%*s,%*s,%*s,%*s,%*s,%9[^,],%*s",
+               bookings[bookingCount].genre,
+               bookings[bookingCount].subgenre,
+               bookings[bookingCount].customerPhone,
+               bookings[bookingCount].date,
+               bookings[bookingCount].status);
+
         bookingCount++;
     }
 
     fclose(file);
 
-    // Sort the linked list based on the booking date (latest first)
-    BookingNode *temp = head;
-    BookingNode *arr[bookingCount];
-    int i = 0;
+    // Sort the bookings by date (latest first)
+    qsort(bookings, bookingCount, sizeof(Booking), compareDates);
 
-    while (temp) {
-        arr[i++] = temp;
-        temp = temp->next;
+    // Print the table header
+    printf("\n"CYAN "%-20s %-25s %-15s %-19s %-10s\n", "Genre", "Subgenre", "Customer Phone", "Date"," ");
+    printf(CYAN "----------------------------------------------------------------------------\n");
+
+    // Print the latest 10 bookings or as many as available
+    int count = bookingCount < 10 ? bookingCount : 10;
+    for (int i = 0; i < count; i++) {
+        printf(MAGENTA "%-20s %-25s %-15s %-15s %-10s\n", bookings[i].genre, bookings[i].subgenre, bookings[i].customerPhone, bookings[i].date,bookings[i].status);
     }
-
-    qsort(arr, bookingCount, sizeof(BookingNode*), compareDates);
-
-    // Reconstruct the sorted linked list
-    head = arr[0];
-    for (i = 1; i < bookingCount; i++) {
-        arr[i - 1]->next = arr[i];
-    }
-    arr[bookingCount - 1]->next = NULL;
-
-    // Display the sorted bookings (latest first)
-    displayBookings(head);
 }
 void viewAllContractors() {
     FILE *file = fopen("contractors.csv", "r");
@@ -748,8 +815,10 @@ void assignContractorsToCustomers() {
 
     if (phoneFound) {
         printf(GREEN"Contractor ID has been successfully assigned to the customer with phone number %s.\n", phone);
+        create_new_event_csv("events.csv", "event_new.csv");
     }
 }
+
 
 void displayMenu() {
     int choice;
@@ -767,9 +836,9 @@ void displayMenu() {
         AdminCenteredText("[1] Assign Contractors to Customers", width, BLUE);
         AdminCenteredText("[2] View Event Details", width, GREEN);
         AdminCenteredText("[3] View Customer Details", width, PINK);
-        AdminCenteredText("[4] Show latest ten Bookings", width, CYAN);
-        AdminCenteredText("[5]. Log Out", width, RED);
+        AdminCenteredText("[4] Show latest 10 bookings", width, CYAN);
         // AdminCenteredText("[6] Customer Query", width, CYAN);
+        AdminCenteredText("[5]. Log Out", width, RED);
         printf(WHITE "Enter your choice: " RESET);
         scanf("%d", &choice);
         clearScreen();
