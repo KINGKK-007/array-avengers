@@ -33,9 +33,9 @@
   1. Clone the repository<br>
   git clone <repository_url><br>
   2. Compile the Program<br>
-  gcc -o event_manager main.c<br>
+  open the terminal and type make<br>
   3. Run the Program<br>
-  ./event_manager<br>
+  ./program<br>
   4. Log in<br>
   Choose one of the following login options based on your role:<br>
   User Login<br>
