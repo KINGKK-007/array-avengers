@@ -23,6 +23,8 @@ void master_viewAllContractors();
 void addNewAdmin();
 void manageAdminsMenu();
 void removeAdmin();
+void read_event_data();
+
 #define RESET "\033[0m"
 #define RED "\033[31m"
 #define GREEN "\033[32m"
