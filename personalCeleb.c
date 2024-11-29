@@ -207,7 +207,7 @@ void personal_main()
 
         // Display the header
         personal_displayBanner(width);
-        personal_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO personal EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        personal_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO PERSONAL EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         personal_displayBanner(width);
 
         // Menu options
@@ -454,15 +454,18 @@ void personal_bookEvent()
             printf("\033[1;32mTotal Amount Paid:\033[0m ₹%.2f\n", newBooking.totalAmount);
             personal_displayBanner(personal_getTerminalWidth());
             personal_displayCenteredText("\xF0\x9F\x98\x8A Thank you for your payment! \xF0\x9F\x98\x8A", personal_getTerminalWidth(), BLUE); // 😊
+            // Save booking and confirm
+            strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
+            bookings[personal_bookingCount++] = newBooking;
+            personal_saveBookingsToCSV();
+
+            system("clear");
+            personal_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", personal_getTerminalWidth(), GREEN BOLD); // 🎉
+        }
+        else if (confirm == 'N' || confirm == 'n'){
+            personal_displayCenteredText("\xF0\x9F\x9A\xAB Booking canceled. Returning to menu... \xF0\x9F\x9A\xAB", personal_getTerminalWidth(), RED); // 🚫
         }
 
-        // Save booking and confirm
-        strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
-        bookings[personal_bookingCount++] = newBooking;
-        personal_saveBookingsToCSV();
-
-        system("clear");
-        personal_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", personal_getTerminalWidth(), GREEN BOLD); // 🎉
     }
     else
     {

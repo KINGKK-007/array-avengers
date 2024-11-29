@@ -20,7 +20,7 @@
 #define WHITE "\033[0;97m"  
 #define MAX_COLUMNS 20
 
-void showtenBookings();
+void showTenBookings();
 int compareDates(const void *a, const void *b);
 
 // Function to split a line into columns by a comma
@@ -159,6 +159,7 @@ void Alogin() {
                 break;
             case 3:
                 printf(GREEN "Exiting the system. Goodbye!\n" RESET);
+                system("pkill afplay");
                 exit(0);
             default:
                 printf(RED "Invalid choice. Please try again.\n" RESET);
@@ -587,49 +588,6 @@ int compareDates(const void *a, const void *b) {
     return strcmp(((Booking*)b)->date, ((Booking*)a)->date);  // Sort descending (latest first)
 }
 
-// Function to show the latest 10 bookings
-void showtenBookings() {
-    FILE *file = fopen("bookings.csv", "r");
-    if (!file) {
-        perror(RED "Unable to open bookings.csv");
-        return;
-    }
-
-    Booking bookings[MAX_BOOKINGS];
-    int bookingCount = 0;
-
-    char line[MAX_LINE_LENGTH];
-    
-    // Read the CSV file line by line
-    while (fgets(line, sizeof(line), file)) {
-        if (bookingCount >= MAX_BOOKINGS) break;  // Stop if we've reached the limit
-
-        // Parse the CSV line into relevant fields
-        sscanf(line, "%99[^,],%99[^,],%19[^,],%19[^,],%*s,%*s,%*s,%*s,%*s,%9[^,],%*s",
-               bookings[bookingCount].genre,
-               bookings[bookingCount].subgenre,
-               bookings[bookingCount].customerPhone,
-               bookings[bookingCount].date,
-               bookings[bookingCount].status);
-
-        bookingCount++;
-    }
-
-    fclose(file);
-
-    // Sort the bookings by date (latest first)
-    qsort(bookings, bookingCount, sizeof(Booking), compareDates);
-
-    // Print the table header
-    printf("\n"CYAN "%-20s %-25s %-15s %-19s %-10s\n", "Genre", "Subgenre", "Customer Phone", "Date"," ");
-    printf(CYAN "----------------------------------------------------------------------------\n");
-
-    // Print the latest 10 bookings or as many as available
-    int count = bookingCount < 10 ? bookingCount : 10;
-    for (int i = 0; i < count; i++) {
-        printf(MAGENTA "%-20s %-25s %-15s %-15s %-10s\n", bookings[i].genre, bookings[i].subgenre, bookings[i].customerPhone, bookings[i].date,bookings[i].status);
-    }
-}
 void viewAllContractors() {
     FILE *file = fopen("contractors.csv", "r");
     if (!file) {

@@ -30,6 +30,7 @@ int prof_isFutureDateTime(char *dateStr, char *timeStr);
 int prof_getIntInput(char *prompt, int min, int max);
 void prof_clearInputBuffer();
 int prof_getTerminalWidth();
+int prof_getTerminalWidth();
 
 // Booking structure
 typedef struct
@@ -454,15 +455,18 @@ void prof_bookEvent()
             printf("\033[1;32mTotal Amount Paid:\033[0m ₹%.2f\n", newBooking.totalAmount);
             prof_displayBanner(prof_getTerminalWidth());
             prof_displayCenteredText("\xF0\x9F\x98\x8A Thank you for your payment! \xF0\x9F\x98\x8A", prof_getTerminalWidth(), BLUE); // 😊
+            // Save booking and confirm
+            strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
+            bookings[prof_bookingCount++] = newBooking;
+            prof_saveBookingsToCSV();
+
+            system("clear");
+            prof_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", prof_getTerminalWidth(), GREEN BOLD); // 🎉
+        }
+        else if (confirm == 'N' || confirm == 'n'){
+        prof_displayCenteredText("\xF0\x9F\x9A\xAB Booking canceled. Returning to menu... \xF0\x9F\x9A\xAB", prof_getTerminalWidth(), RED); // 🚫
         }
 
-        // Save booking and confirm
-        strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
-        bookings[prof_bookingCount++] = newBooking;
-        prof_saveBookingsToCSV();
-
-        system("clear");
-        prof_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", prof_getTerminalWidth(), GREEN BOLD); // 🎉
     }
     else
     {

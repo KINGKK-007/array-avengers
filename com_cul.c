@@ -207,7 +207,7 @@ void com_main()
 
         // Display the header
         com_displayBanner(width);
-        com_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO com EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        com_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO COMMUNITY AND CULTURAL EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         com_displayBanner(width);
 
         // Menu options
@@ -454,15 +454,19 @@ void com_bookEvent()
             printf("\033[1;32mTotal Amount Paid:\033[0m ₹%.2f\n", newBooking.totalAmount);
             com_displayBanner(com_getTerminalWidth());
             com_displayCenteredText("\xF0\x9F\x98\x8A Thank you for your payment! \xF0\x9F\x98\x8A", com_getTerminalWidth(), BLUE); // 😊
+            // Save booking and confirm
+            strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
+            bookings[com_bookingCount++] = newBooking;
+            com_saveBookingsToCSV();
+
+            system("clear");
+            com_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", com_getTerminalWidth(), GREEN BOLD); // 🎉
+            
+        }
+        else if (confirm == 'N' || confirm == 'n'){
+        com_displayCenteredText("\xF0\x9F\x9A\xAB Booking canceled. Returning to menu... \xF0\x9F\x9A\xAB", com_getTerminalWidth(), RED); // 🚫
         }
 
-        // Save booking and confirm
-        strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
-        bookings[com_bookingCount++] = newBooking;
-        com_saveBookingsToCSV();
-
-        system("clear");
-        com_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", com_getTerminalWidth(), GREEN BOLD); // 🎉
     }
     else
     {

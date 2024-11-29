@@ -1,5 +1,5 @@
-Genre,Sub Genre,Date,Contractor ID,Work Status,Work Progress
-Health and Wellness,Yoga Sessions,2025/06/06,#con3,pending,0
-Health and Wellness,Meditation Workshops,2024/12/02,#con3,pending,0
-Health and Wellness,Zumba or Dance Classes,2024/12/13,#con3,pending,0
+Category,Event Name,Deadline,Contractor ID,Status,Progress
+Health and Wellness,Yoga Sessions,2025/06/06,#con3,pending,0
+Health and Wellness,Meditation Workshops,2024/12/02,#con3,pending,0
+Health and Wellness,Zumba or Dance Classes,2024/12/13,#con3,pending,0
 Health and Wellness,Health Check-up Camp,2024/12/03,#con2,pending,0

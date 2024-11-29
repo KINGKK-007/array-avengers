@@ -207,7 +207,7 @@ void edu_main()
 
         // Display the header
         edu_displayBanner(width);
-        edu_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO edu EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
+        edu_displayCenteredText("\xF0\x9F\x92\xAB WELCOME TO EDUCATIONAL AND ACADEMIC EVENTS \xF0\x9F\x92\xAB", width, CYAN); // 💫
         edu_displayBanner(width);
 
         // Menu options
@@ -454,15 +454,17 @@ void edu_bookEvent()
             printf("\033[1;32mTotal Amount Paid:\033[0m ₹%.2f\n", newBooking.totalAmount);
             edu_displayBanner(edu_getTerminalWidth());
             edu_displayCenteredText("\xF0\x9F\x98\x8A Thank you for your payment! \xF0\x9F\x98\x8A", edu_getTerminalWidth(), BLUE); // 😊
+            // Save booking and confirm
+            strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
+            bookings[edu_bookingCount++] = newBooking;
+            edu_saveBookingsToCSV();
+            system("clear");
+            edu_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", edu_getTerminalWidth(), GREEN BOLD); // 🎉
         }
 
-        // Save booking and confirm
-        strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
-        bookings[edu_bookingCount++] = newBooking;
-        edu_saveBookingsToCSV();
-
-        system("clear");
-        edu_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", edu_getTerminalWidth(), GREEN BOLD); // 🎉
+        else if (confirm == 'N' || confirm == 'n'){
+        edu_displayCenteredText("\xF0\x9F\x9A\xAB Booking canceled. Returning to menu... \xF0\x9F\x9A\xAB", edu_getTerminalWidth(), RED); // 🚫
+        }
     }
     else
     {

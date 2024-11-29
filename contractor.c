@@ -1,28 +1,32 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-// #include <windows.h> // For UTF-8 support commented out two lines in this code for mac
 
 #define USE_EMOJIS 1
 
 // Structure for event/task details
 typedef struct {
-    int eventID;
+    char category[50];
     char eventName[50];
-    char eventType[30];
     char deadline[20];
+    char contractorID[20];
     char status[20]; // Pending, In Progress, Completed
     int progress;    // Progress percentage
 } Event;
 
 // Function prototypes
-void contractorMenu(Event events[], int totalTasks);
-void viewTasks(Event events[], int totalTasks);
+void contractorMenu(Event *events, int totalTasks, char *contractorID);
+void viewTasks(Event *events, int totalTasks, char *contractorID);
+void acceptOrDeclineTask(Event *events, int totalTasks, char *contractorID);
+void writeEventsToFile(const char* filename, Event *events, int totalTasks);
+void updateProgress(Event *events, int totalTasks, char *contractorID);
+void markAsCompleted(Event *events, int totalTasks, char *contractorID);
+int authenticateContractor(char *contractorID);
 void contractorRegister();
 void welcomeMessage();
 void contractor_displayMenu();
-int authenticateContractor();
 void decorativeLine(char ch, int length);
+Event* loadEventsFromFile(const char* filename, int *totalTasks);
 
 // Welcome message
 void welcomeMessage() {
@@ -69,16 +73,10 @@ void decorativeLine(char ch, int length) {
 }
 
 void ContractorLogin() {
-    // SetConsoleOutputCP(CP_UTF8); // Enable UTF-8 encoding for Windows console
     int choice;
-
-    Event events[5] = {
-        {1, "Wedding Event", "Outdoor", "2024-12-10", "Pending", 0},
-        {2, "Corporate Meeting", "Indoor", "2024-12-15", "In Progress", 50},
-        {3, "Birthday Party", "Outdoor", "2024-12-20", "Pending", 0},
-        {4, "Music Concert", "Outdoor", "2024-12-25", "Pending", 0},
-        {5, "Conference", "Indoor", "2024-12-30", "Completed", 100}
-    };
+    int totalTasks = 0;
+    Event *events = loadEventsFromFile("event_new.csv", &totalTasks);
+    char contractorID[20] = "";  // To store the logged-in contractor's ID
 
     welcomeMessage();
 
@@ -87,8 +85,8 @@ void ContractorLogin() {
         scanf("%d", &choice);
         switch (choice) {
             case 1:
-                if (authenticateContractor()) {
-                    contractorMenu(events, 5);
+                if (authenticateContractor(contractorID)) {
+                    contractorMenu(events, totalTasks, contractorID);
                 }
                 break;
             case 2:
@@ -96,10 +94,11 @@ void ContractorLogin() {
                 break;
             case 3:
 #if USE_EMOJIS
-                printf("\n🚪 Exiting the system. See you next time!\n");
+                printf("\n🚪 Exiting...\n");
 #else
-                printf("\n[EXIT] Exiting the system. See you next time!\n");
+                printf("\n[EXIT] Exiting...\n");
 #endif
+                free(events);  // Free dynamically allocated memory
                 exit(0);
             default:
 #if USE_EMOJIS
@@ -111,10 +110,277 @@ void ContractorLogin() {
     }
 }
 
-int authenticateContractor() {
+// Load events from CSV file
+Event* loadEventsFromFile(const char* filename, int *totalTasks) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        printf("\n❌ Error: Could not open file %s\n", filename);
+        exit(1);  // Exit if the file cannot be opened
+    }
+
+    // First count the number of lines in the CSV file
+    int count = 0;
+    char buffer[200];
+    while (fgets(buffer, sizeof(buffer), file)) {
+        count++;
+    }
+
+    // Allocate memory for events
+    Event *events = (Event*)malloc(count * sizeof(Event));
+    if (!events) {
+        printf("\n❌ Memory allocation failed!\n");
+        exit(1);
+    }
+
+    // Rewind the file to read the events
+    rewind(file);
+
+    // Read events into the array
+    int i = 0;
+    while (fscanf(file, "%49[^,],%49[^,],%19[^,],%19[^,],%19[^,],%d\n", 
+                  events[i].category, events[i].eventName, events[i].deadline, 
+                  events[i].contractorID, events[i].status, &events[i].progress) != EOF) {
+        i++;
+    }
+
+    fclose(file);
+    *totalTasks = count;
+    return events;
+}
+
+// Contractor menu
+void contractorMenu(Event *events, int totalTasks, char *contractorID) {
+    int choice;
+    while (1) {
+        decorativeLine('~', 50);
+        printf("CONTRACTOR DASHBOARD\n");
+        decorativeLine('~', 50);
+
+        printf("1. View Assigned Tasks\n");
+        printf("2. Accept/Decline Tasks\n");
+        printf("3. Update Task Progress\n");
+        printf("4. Mark Task as Completed\n");
+        printf("5. Back to Main Menu\n");
+        decorativeLine('-', 50);
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                viewTasks(events, totalTasks, contractorID);
+                break;
+            case 2:
+                acceptOrDeclineTask(events, totalTasks, contractorID);
+                break;
+            case 3:
+                updateProgress(events, totalTasks, contractorID);
+                break;
+            case 4:
+                markAsCompleted(events, totalTasks, contractorID);
+                break;
+            case 5:
+                return; // Go back to the main menu
+            default:
+                printf("\nInvalid choice! Please try again.\n");
+        }
+    }
+}
+
+// View tasks
+void viewTasks(Event *events, int totalTasks, char *contractorID) {
+    decorativeLine('=', 40);
+    printf("ASSIGNED TASKS\n");
+    decorativeLine('=', 40);
+
+    int taskFound = 0;
+    for (int i = 0; i < totalTasks; i++) {
+        if (strcmp(events[i].contractorID, contractorID) == 0) {
+            taskFound = 1;
+            printf("Event ID: %d\n", i+1);
+            printf("   Category: %s\n", events[i].category);
+            printf("   Event Name: %s\n", events[i].eventName);
+            printf("   Deadline: %s\n", events[i].deadline);
+            printf("   Contractor ID: %s\n", events[i].contractorID);
+            printf("   Status: %s\n", events[i].status);
+            printf("   Progress: %d%%\n", events[i].progress);
+            decorativeLine('-', 40);
+        }
+    }
+
+    if (!taskFound) {
+        printf("\nNo tasks assigned to you.\n");
+    }
+
+    printf("\nPress Enter to go back...");
+    getchar();
+    getchar();
+}
+
+
+// Accept or Decline a task
+void acceptOrDeclineTask(Event *events, int totalTasks, char *contractorID) {
+    int eventID, choice;
+    printf("\nEnter the Event ID to accept/decline (or type -1 to go back): ");
+    scanf("%d", &eventID);
+
+    if (eventID == -1) return; // Go back if the user enters -1
+
+    // Check if the event is valid and assigned to the current contractor
+    if (eventID < 1 || eventID > totalTasks || strcmp(events[eventID-1].contractorID, contractorID) != 0) {
+        printf("\n❌ Invalid Event ID or this event is not assigned to you.\n");
+        return;
+    }
+
+    // Display event details
+    printf("\nEvent Details:\n");
+    printf("   Event Name: %s\n", events[eventID-1].eventName);
+    printf("   Deadline: %s\n", events[eventID-1].deadline);
+    printf("   Status: %s\n", events[eventID-1].status);
+    printf("   Progress: %d%%\n", events[eventID-1].progress);
+
+    // If the task has more than 50% progress, it cannot be declined
+    if (events[eventID-1].progress > 50) {
+        printf("\n❌ This event is more than 50%% completed and cannot be declined.\n");
+        return;
+    }
+
+    // Prompt the contractor to accept or decline the task
+    printf("\n1. Accept\n2. Decline\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+    while(getchar() != '\n');  // Clear the input buffer
+
+    if (choice == 1) {
+        strcpy(events[eventID-1].status, "In Progress");
+        printf("\n✅ Event Accepted.\n");
+    } else if (choice == 2) {
+        strcpy(events[eventID-1].status, "Declined");
+        printf("\n🚫 Event Declined. Notifying Admin...\n");
+    } else {
+        printf("\nInvalid Choice.\n");
+        return;
+    }
+
+    // After updating the status, write the updated events to the CSV
+    writeEventsToFile("event_new.csv", events, totalTasks);
+
+    // After accepting or declining, return to the main contractor dashboard
+    printf("\nReturning to the contractor dashboard...\n");
+}
+
+
+// Function to write updated events back to the CSV file
+// Function to write updated events back to the CSV file
+void writeEventsToFile(const char* filename, Event *events, int totalTasks) {
+    FILE *file = fopen(filename, "r+");  // Open file in read-write mode
+    if (!file) {
+        printf("\n❌ Error: Could not open file %s for reading\n", filename);
+        return;
+    }
+
+    char line[256];
+    int headerWritten = 0;
+
+    // Check if the header exists
+    if (fgets(line, sizeof(line), file)) {
+        if (strstr(line, "Category") != NULL) {  // Check if the header is already there
+            headerWritten = 1;
+        }
+    }
+    fclose(file);
+
+    // Reopen the file in write mode to write events
+    file = fopen(filename, "w");  // Open file in write mode
+    if (!file) {
+        printf("\n❌ Error: Could not open file %s for writing\n", filename);
+        return;
+    }
+
+    // Write the header if it's not written yet
+    if (!headerWritten) {
+        fprintf(file, "Category,Event Name,Deadline,Contractor ID,Status,Progress\n");
+    }
+
+    // Write the events data
+    for (int i = 0; i < totalTasks; i++) {
+        fprintf(file, "%s,%s,%s,%s,%s,%d\n",
+                events[i].category,
+                events[i].eventName,
+                events[i].deadline,
+                events[i].contractorID,
+                events[i].status,
+                events[i].progress);
+    }
+
+    fclose(file);
+    printf("\n✅ Task status updated successfully and saved to the file!\n");
+}
+
+
+
+
+
+// Update task progress
+// Update task progress
+void updateProgress(Event *events, int totalTasks, char *contractorID) {
+    int eventID, progress;
+    printf("\nEnter the Event ID to update progress (or type -1 to go back): ");
+    scanf("%d", &eventID);
+
+    if (eventID == -1) return;
+
+    if (eventID < 1 || eventID > totalTasks || strcmp(events[eventID-1].contractorID, contractorID) != 0) {
+        printf("\n❌ Invalid Event ID or this event is not assigned to you.\n");
+        return;
+    }
+
+    printf("Enter Progress Percentage (0-100): ");
+    scanf("%d", &progress);
+    if (progress >= 0 && progress <= 100) {
+        events[eventID-1].progress = progress;
+        if (progress < 100) {
+            strcpy(events[eventID-1].status, "In Progress");
+        }
+        printf("\n✅ Progress Updated.\n");
+
+        // Write the updated events to the file
+        writeEventsToFile("event_new.csv", events, totalTasks);
+    } else {
+        printf("\nInvalid Progress Value.\n");
+    }
+}
+
+
+// Mark task as completed
+// Mark task as completed
+void markAsCompleted(Event *events, int totalTasks, char *contractorID) {
+    int eventID;
+    printf("\nEnter the Event ID to mark as completed (or type -1 to go back): ");
+    scanf("%d", &eventID);
+
+    if (eventID == -1) return;  // Go back to the dashboard
+
+    // Check if the event ID is valid and belongs to the contractor
+    if (eventID < 1 || eventID > totalTasks || strcmp(events[eventID - 1].contractorID, contractorID) != 0) {
+        printf("\n❌ Invalid Event ID or this event is not assigned to you.\n");
+        return;
+    }
+
+    // Update the task's status and progress
+    events[eventID - 1].progress = 100;
+    strcpy(events[eventID - 1].status, "Completed");
+    printf("\n🎉 Task marked as Completed! Great Job!\n");
+
+    // Write the updated events to the file
+    writeEventsToFile("event_new.csv", events, totalTasks);  // Ensure this function is correctly implemented
+}
+
+
+// Authenticate contractor
+int authenticateContractor(char *contractorID) {
     char input[50], password[50];
-    char fileID[20], filePhone[20], fileUsername[50], filePassword[50], fileCity[50], fileState[50];
     FILE *file;
+    char fileID[20], filePhone[20], fileUsername[50], filePassword[50], fileCity[50], fileState[50];
 
     decorativeLine('~', 50);
     printf("\nCONTRACTOR LOGIN\n");
@@ -135,6 +401,7 @@ int authenticateContractor() {
     while (fscanf(file, "%[^,],%[^,],%[^,],%[^,],%[^,],%s\n", fileID, filePhone, fileUsername, filePassword, fileCity, fileState) != EOF) {
         if ((strcmp(input, fileID) == 0 || strcmp(input, filePhone) == 0) && strcmp(password, filePassword) == 0) {
             fclose(file);
+            strcpy(contractorID, fileID);  // Store contractorID
 #if USE_EMOJIS
             printf("\n✅ Login Successful! Welcome, %s! Your Contractor ID is: %s\n", fileUsername, fileID);
 #else
@@ -152,56 +419,6 @@ int authenticateContractor() {
 #endif
     return 0; // Login failed
 }
-
-
-// Contractor menu
-void contractorMenu(Event events[], int totalTasks) {
-    int choice;
-    while (1) {
-        decorativeLine('~', 50);
-        printf("CONTRACTOR DASHBOARD\n");
-        decorativeLine('~', 50);
-
-        printf("1. View Assigned Tasks\n");
-        printf("2. Back to Main Menu\n");
-        decorativeLine('-', 50);
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
-
-        switch (choice) {
-            case 1:
-                viewTasks(events, totalTasks);
-                break;
-            case 2:
-                return; // Go back to the main menu
-            default:
-                printf("\nInvalid choice! Please try again.\n");
-        }
-    }
-}
-
-// View tasks
-void viewTasks(Event events[], int totalTasks) {
-    decorativeLine('=', 40);
-    printf("ASSIGNED TASKS\n");
-    decorativeLine('=', 40);
-
-    for (int i = 0; i < totalTasks; i++) {
-        printf("Event ID: %d\n", events[i].eventID);
-        printf("   Name: %s\n", events[i].eventName);
-        printf("   Type: %s\n", events[i].eventType);
-        printf("   Deadline: %s\n", events[i].deadline);
-        printf("   Status: %s\n", events[i].status);
-        printf("   Progress: %d%%\n", events[i].progress);
-        decorativeLine('-', 40);
-    }
-
-    printf("\nPress Enter to go back...");
-    getchar();
-    getchar();
-}
-
-
 
 // Register contractor
 void contractorRegister() {

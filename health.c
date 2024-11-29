@@ -454,15 +454,17 @@ void health_bookEvent()
             printf("\033[1;32mTotal Amount Paid:\033[0m ₹%.2f\n", newBooking.totalAmount);
             health_displayBanner(health_getTerminalWidth());
             health_displayCenteredText("\xF0\x9F\x98\x8A Thank you for your payment! \xF0\x9F\x98\x8A", health_getTerminalWidth(), BLUE); // 😊
+            // Save booking and confirm
+            strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
+            bookings[health_bookingCount++] = newBooking;
+            health_saveBookingsToCSV();
+            system("clear");
+            health_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", health_getTerminalWidth(), GREEN BOLD); // 🎉
+        }
+        else if (confirm == 'N' || confirm == 'n'){
+        health_displayCenteredText("\xF0\x9F\x9A\xAB Booking canceled. Returning to menu... \xF0\x9F\x9A\xAB", health_getTerminalWidth(), RED); // 🚫
         }
 
-        // Save booking and confirm
-        strncpy(newBooking.status, "Approved", sizeof(newBooking.status) - 1);
-        bookings[health_bookingCount++] = newBooking;
-        health_saveBookingsToCSV();
-
-        system("clear");
-        health_displayCenteredText("\xF0\x9F\x8E\x89 Booking Confirmed! \xF0\x9F\x8E\x89", health_getTerminalWidth(), GREEN BOLD); // 🎉
     }
     else
     {
