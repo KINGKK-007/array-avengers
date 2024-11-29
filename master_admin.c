@@ -141,7 +141,7 @@ void masterAdminMenu() {
                 manageFundsMenu();
                 break;
             case 4:
-                viewAllCustomerContractorLinks();
+                read_event_data();
                 break;
             case 5:
                 masterAdminCenteredText("Logging out...\n", width, RED);
@@ -735,43 +735,40 @@ void displayRevenueByGenre() {
     printf(CYAN "-------------------------------------------------------------\n");
 }
 
-void viewAllCustomerContractorLinks() {
-    FILE *file = fopen("customer_contractor_link.csv", "r");
+void read_event_data() {
+    FILE *file = fopen("events.csv", "r");  // Open the CSV file for reading
     if (!file) {
-        perror(RED "Unable to open customer_contractor_link.csv");
+        perror("Error opening events.csv");  // Handle file open error
         return;
     }
 
-    char line[MAX_LINE_LENGTH];
-    
-    // Print the table header
-    printf("\n"RED "Customer - Contractor Linkage:\n");
-    printf(CYAN "------------------------------------------------\n");
-    printf(CYAN "| %-20s | %-15s |\n", "Customer Phone", "Contractor ID");
-    printf(CYAN "------------------------------------------------\n");
+    char buffer[1024];  // Buffer to store each line of the file
 
-    // Read the file line by line
-    while (fgets(line, sizeof(line), file)) {
-        // Strip the newline character (if any) at the end of the line
-        line[strcspn(line, "\n")] = 0;
+    // Print header for output
+    printf("Genre                 | Sub-genre            | Phone Number  | Date       | Contractor ID\n");
+    printf("--------------------------------------------------------------------------------------------\n");
 
-        // Debug: Print the line to check its content
-        // printf("Line read: '%s'\n", line);
+    // Read each line of the file
+    while (fgets(buffer, sizeof(buffer), file)) {
+        // Tokenize the line by commas
+        char *genre = strtok(buffer, ",");
+        char *sub_genre = strtok(NULL, ",");
+        char *phone = strtok(NULL, ",");
+        char *date = strtok(NULL, ",");
 
-        // Tokenize the line
-        char *phoneNumber = strtok(line, ",");
-        char *contractorId = strtok(NULL, ",");
+        // Skip the next 7 columns (5 to 11)
+        for (int i = 0; i < 8; i++) {
+            strtok(NULL, ",");  // Skip columns 5 to 11
+        }
 
-        // Check if both customer phone number and contractor ID are present
-        if (phoneNumber && contractorId) {
-            // Print each row in the table
-            printf(PINK "| %-20s | %-15s |\n", phoneNumber, contractorId);
-        } else {
-            // Handle unexpected data (if any)
-           
+        // Now extract the 12th column (Contractor ID)
+        char *contractor_id = strtok(NULL, ",");
+
+        // Print the required fields
+        if (genre && sub_genre && phone && date && contractor_id) {
+            printf("%-25s | %-25s | %-13s | %-10s | %s\n", genre, sub_genre, phone, date, contractor_id);
         }
     }
 
-    printf(CYAN "------------------------------------------------\n");
-    fclose(file);
+    fclose(file);  // Close the file
 }
